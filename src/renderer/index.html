@@ -3,10 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Le renderer ne charge rien depuis le reseau : tout est empaquete. -->
+    <!--
+      Le renderer ne charge rien depuis le reseau. `telmi-fichier:` est le protocole
+      maison qui sert les fichiers que le contributeur a explicitement choisis :
+      c'est ce qui lui permet de voir sa couverture et d'ecouter ses pistes sans
+      qu'on ouvre l'acces au disque.
+    -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+      content="default-src 'self'; img-src 'self' data: telmi-fichier:; media-src 'self' telmi-fichier:; style-src 'self' 'unsafe-inline'"
     />
     <title>Telmi Store</title>
   </head>

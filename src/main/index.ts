@@ -1,15 +1,20 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'node:path'
 import { enregistrerIpc } from './ipc'
+import { declarerProtocole, servirProtocole } from './protocole'
+import { nettoyerTravail } from './telechargement'
 
 const estDev = !app.isPackaged
+
+// Doit preceder app.whenReady() : le scheme doit etre connu avant tout chargement.
+declarerProtocole()
 
 const creerFenetre = (): void => {
   const fenetre = new BrowserWindow({
     width: 1180,
-    height: 780,
-    minWidth: 900,
-    minHeight: 600,
+    height: 820,
+    minWidth: 960,
+    minHeight: 640,
     show: false,
     autoHideMenuBar: true,
     title: 'Telmi Store',
@@ -39,7 +44,10 @@ const creerFenetre = (): void => {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await nettoyerTravail()
+  servirProtocole()
+
   enregistrerIpc()
   creerFenetre()
 
@@ -50,4 +58,8 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
+})
+
+app.on('will-quit', () => {
+  void nettoyerTravail()
 })

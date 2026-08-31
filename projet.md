@@ -39,28 +39,32 @@ des packs — et l'écran qui rend visible le bug des `version: 0`.
 
 ---
 
-## Lot 1 — Déposer : l'écran d'entrée
+## Lot 1 — Déposer : l'écran d'entrée ✅
 
-**Taille : M.** Dépend de : rien. C'est la porte d'entrée de tout le projet.
+**Livré.** Dépend de : rien. C'est la porte d'entrée de tout le projet.
 
 Un seul écran, qui doit être franchissable par un parent ou une institutrice.
 
-- [ ] **Un mp3 seul** ou **plusieurs chapitres**, au choix, sans que le second cas
+- [x] **Un mp3 seul** ou **plusieurs chapitres**, au choix, sans que le second cas
       complique le premier
-- [ ] Chaque chapitre vient d'un **fichier local** (glisser-déposer ou sélecteur) **ou
+- [x] Chaque chapitre vient d'un **fichier local** (glisser-déposer ou sélecteur) **ou
       d'une URL**
-- [ ] Réordonner les chapitres, en renommer un, en retirer un
-- [ ] Afficher la durée de chaque chapitre et le poids total — la durée vient
+- [x] Réordonner les chapitres, en renommer un, en retirer un
+- [x] Afficher la durée de chaque chapitre et le poids total — la durée vient
       gratuitement d'un élément `<audio>`, il n'y a rien à décoder
-- [ ] Champs du pack : titre, âge, catégorie, langue, description, **question du menu**
+- [x] Champs du pack : titre, âge, catégorie, langue, description, **question du menu**
       (« Quelle histoire veux-tu écouter ? »)
-- [ ] Couverture obligatoire : fichier ou URL
-- [ ] Image par chapitre, facultative — à défaut, la couverture
-- [ ] Bloc **droits** obligatoire : statut, source, déclarant
-- [ ] Aperçu avant fabrication : la liste des chapitres avec leurs durées et le poids total
+- [x] Couverture obligatoire : fichier ou URL
+- [x] Image par chapitre, facultative — à défaut, la couverture
+- [x] Bloc **droits** obligatoire : statut, source, déclarant
+- [x] Aperçu avant fabrication : la liste des chapitres avec leurs durées et le poids total
 
 **Critère d'acceptation.** Depuis un dossier de mp3 quelconque, on remplit l'écran et on
-arrive au bout sans jamais ouvrir un terminal ni un éditeur de texte.
+arrive au bout sans jamais ouvrir un terminal ni un éditeur de texte. **Reste à confirmer
+par un essai humain** : le glisser-déposer et l'aperçu ne se testent pas sans souris.
+
+En prime, le contributeur peut **écouter chaque piste dans l'écran** avant de proposer —
+ce qui est la moitié du travail de curation.
 
 **Points d'attention.**
 - Le téléchargement d'une URL se fait dans le processus principal, pas dans le renderer :

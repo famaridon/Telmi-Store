@@ -84,6 +84,35 @@ quoi faire ; `details` porte le technique ; `code` est stable et destiné au cod
 `enregistrerIpc()` enveloppe chaque gestionnaire pour qu'une exception échappée devienne
 malgré tout un `Resultat` non-ok.
 
+## 3 bis. Voir et écouter sans donner accès au disque ✅
+
+Le contributeur doit pouvoir **regarder sa couverture** et **écouter ses pistes** avant de
+proposer une histoire. Avec `contextIsolation`, le renderer n'a pas accès au système de
+fichiers, et une page servie par Vite ne peut pas charger de `file://`.
+
+D'où un protocole maison, `telmi-fichier://local/<identifiant>` :
+
+- le processus principal tient une table des fichiers que le contributeur a
+  **explicitement choisis** — sélecteur, glisser-déposer ou téléchargement ;
+- l'interface ne reçoit qu'un identifiant opaque, jamais un chemin ;
+- le protocole ne sert que les identifiants de cette table : ni traversée de répertoire,
+  ni lecture arbitraire possible depuis l'interface ;
+- il répond aux requêtes de plage (`206 Partial Content`), sans quoi un `<audio>` ne peut
+  pas se déplacer dans une piste de quatorze minutes.
+
+Le chemin d'un fichier déposé s'obtient par `webUtils.getPathForFile()`, appelé dans le
+preload : c'est la seule voie depuis qu'Electron a retiré `File.path`.
+
+### Une propriété heureuse de la CSP
+
+La CSP autorise `telmi-fichier:` dans `img-src` et `media-src`, mais **pas** dans
+`connect-src`. Vérifié à l'exécution : un `<img>` et un `<audio>` chargent, un `fetch()`
+sur la même URL est refusé.
+
+L'interface peut donc **afficher** un fichier sans pouvoir en **lire les octets**. Ce
+n'était pas prémédité, mais c'est exactement la posture qu'on veut : les octets ne
+traversent jamais l'IPC ni le JavaScript de la page.
+
 ## 4. Où vivent les appels GitHub
 
 **Dans le processus principal, exclusivement.** Le jeton ne doit jamais exister dans le
@@ -210,6 +239,10 @@ src/
 │   ├── index.ts          ✅ fenêtre, cycle de vie
 │   ├── ipc/index.ts      ✅ enregistrement, conversion des exceptions
 │   ├── bibliotheque.ts   ✅ lecture de ~/.telmi/stories
+│   ├── protocole.ts      ✅ telmi-fichier://, avec requêtes de plage
+│   ├── fichiers.ts       ✅ table des fichiers autorisés, description
+│   ├── selecteur.ts      ✅ sélecteur natif
+│   ├── telechargement.ts ✅ URL → fichier de travail, avec progression
 │   ├── github/
 │   │   ├── auth.ts          Device Flow, stockage du jeton
 │   │   ├── depots.ts        création de dépôt, releases, envoi d'asset
@@ -221,8 +254,11 @@ src/
 │   └── pack/
 │       └── archive.ts       zip d'un dossier de ~/.telmi/stories
 └── renderer/src/
-    ├── App.tsx           ✅ bibliothèque locale
-    ├── proposer/            choix de l'histoire, formulaire, droits, envoi, suivi
+    ├── App.tsx           ✅ onglets
+    ├── Bibliotheque.tsx  ✅ voie secondaire : une histoire déjà fabriquée
+    ├── depot/            ✅ l'écran de dépôt : pistes, histoire, droits, récapitulatif
+    ├── fabrique/            génération du pack (lot 2)
+    ├── proposer/            dépôt GitHub, release, pull request, suivi
     └── moderer/             propositions ouvertes, écouter, accepter, refuser
 ```
 
@@ -248,8 +284,9 @@ src/
 ## 11. Feuille de route
 
 1. **Bibliothèque locale** ✅ — lire, afficher, signaler les `version: 0`.
-2. **Empreinte et archive** — zipper un dossier d'histoire, calculer son `sha256`.
-3. **Connexion GitHub** — Device Flow, jeton dans le trousseau.
-4. **Proposer** — dépôt, release, fork, fiche, *pull request*, suivi de l'état.
-5. **Modérer** — liste des propositions, écouter, accepter, refuser.
-6. **Annuaire de stores** — pour que l'on trouve les stores sans copier d'URL.
+2. **Écran de dépôt** ✅ — formulaire, pistes par fichier ou par URL, droits, récapitulatif.
+3. **Fabriquer le pack** — `nodes.json`, images, titres dits à voix haute, zip, `sha256`.
+4. **Connexion GitHub** — Device Flow, jeton dans le trousseau.
+5. **Proposer** — dépôt, release, fork, fiche, *pull request*, suivi de l'état.
+6. **Modérer** — liste des propositions, écouter, accepter, refuser.
+7. **Annuaire de stores** — pour que l'on trouve les stores sans copier d'URL.
