@@ -1,0 +1,12 @@
+node_modules/
+out/
+dist/
+.DS_Store
+*.log
+
+# Sortie du collecteur : 3,4 Go d'audio. Jamais dans git — c'est tout l'objet
+# de l'architecture (voir docs/archi.md).
+Telmi-Import/
+__pycache__/
+*.pyc
+*.tsbuildinfo

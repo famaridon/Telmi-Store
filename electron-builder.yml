@@ -1,0 +1,11 @@
+appId: fr.telmi.store
+productName: Telmi Store
+directories:
+  buildResources: resources
+files:
+  - out/**
+  - package.json
+mac:
+  category: public.app-category.education
+  identity: null
+  target: [dmg]
