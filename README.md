@@ -121,19 +121,13 @@ npm run dist:mac     # produit un .dmg
 
 Node 22.13 ou plus récent.
 
-## Le collecteur
+## À propos du contenu
 
-`telmi-collecte.py` récupère des contenus audio libres — flux de podcasts,
-archive.org, liens directs — et produit des dossiers directement importables par
-Telmi-Sync au format « liste audio ». Il ne dépend que de la bibliothèque standard
-Python, et sa configuration est dans `sources.json`.
+Cette application ne collecte rien et n'embarque aucun contenu : elle fabrique un pack à
+partir de ce qu'un contributeur dépose, et publie une fiche. Récupérer des audios libres —
+flux de podcasts, archive.org, domaine public — est un travail à part, mené avec ses propres
+outils, hors de ce dépôt.
 
-```sh
-python3 telmi-collecte.py --dry-run
-python3 telmi-collecte.py --only podcasts --limit 12
-```
-
-Sa sortie va dans `Telmi-Import/`, exclu de git : c'est du contenu téléchargé, pas du
-code. À terme, cette collecte a vocation à être absorbée par l'application, qui pourra
-enchaîner collecte, fabrication du pack, publication et proposition en une seule
-opération.
+Ce qui compte ici est l'étape d'après : **choisir, dans ce qui existe, les quelques
+histoires qui méritent d'être proposées.** Voir « Dix histoires plutôt que cinq cents »
+plus haut.

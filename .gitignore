@@ -4,9 +4,11 @@ dist/
 .DS_Store
 *.log
 
-# Sortie du collecteur : 3,4 Go d'audio. Jamais dans git — c'est tout l'objet
-# de l'architecture (voir docs/archi.md).
+# Le collecteur de contenus et sa sortie restent hors du depot : ce sont des
+# outils et des donnees personnels, pas le code de l'application.
 Telmi-Import/
+*.py
+sources.json
 __pycache__/
 *.pyc
 *.tsbuildinfo

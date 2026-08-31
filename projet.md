@@ -278,7 +278,8 @@ Un store invisible ne reçoit pas de contribution.
 - [ ] Reprise sur erreur pour les envois d'assets volumineux
 - [ ] **Piper** pour la synthèse des titres, quand le micro ne suffit plus
 - [ ] Import d'un flux RSS complet (la deuxième itération du lot 1)
-- [ ] Absorber `telmi-collecte.py` : collecter, fabriquer, proposer d'un seul geste
+- [ ] Enchaîner collecte et dépôt : importer un lot d'audios déjà récupérés par ailleurs
+      et en faire plusieurs propositions d'affilée
 - [ ] **Proposer à Telmi-Sync** la vérification de l'empreinte au téléchargement — le seul
       point du plan qui demande une modification chez DantSu
 - [ ] **Proposer à Telmi-Sync** l'encodage `pal8` des images d'étape : un drapeau ffmpeg,
