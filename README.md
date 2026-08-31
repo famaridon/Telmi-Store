@@ -80,7 +80,8 @@ Amorçage. La coquille Electron + React + TypeScript est en place, avec une prem
 tranche réelle : la lecture de la bibliothèque locale de Telmi-Sync, qui est l'entrée de
 tout le reste.
 
-Ce qui reste à écrire est décrit dans [docs/archi.md](docs/archi.md).
+Ce qui reste à écrire est découpé dans [projet.md](projet.md), et l'architecture cible
+est décrite dans [docs/archi.md](docs/archi.md).
 
 ## Démarrer
 
