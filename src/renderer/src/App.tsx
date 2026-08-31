@@ -1,40 +1,32 @@
 import { useState } from 'react'
-import EcranDepot from './depot/EcranDepot'
-import Bibliotheque from './Bibliotheque'
+import SubmissionScreen from './submission/SubmissionScreen'
+import Library from './Library'
 
-type Onglet = 'deposer' | 'bibliotheque'
+type Tab = 'submit' | 'library'
 
 function App(): React.JSX.Element {
-  const [onglet, setOnglet] = useState<Onglet>('deposer')
+  const [tab, setTab] = useState<Tab>('submit')
 
   return (
     <main>
       <header>
-        <div className="titre-app">
+        <div className="app-title">
           <h1>Telmi Store</h1>
-          <p className="sous-titre">
-            Dix histoires que les enfants reclament valent mieux que cinq cents qu&apos;ils zappent.
+          <p className="tagline">
+            Dix histoires que les enfants réclament valent mieux que cinq cents qu’ils zappent.
           </p>
         </div>
-        <nav className="onglets">
-          <button
-            type="button"
-            className={onglet === 'deposer' ? 'actif' : ''}
-            onClick={() => setOnglet('deposer')}
-          >
-            Deposer une histoire
+        <nav className="tabs">
+          <button type="button" className={tab === 'submit' ? 'selected' : ''} onClick={() => setTab('submit')}>
+            Déposer une histoire
           </button>
-          <button
-            type="button"
-            className={onglet === 'bibliotheque' ? 'actif' : ''}
-            onClick={() => setOnglet('bibliotheque')}
-          >
-            Ma bibliotheque
+          <button type="button" className={tab === 'library' ? 'selected' : ''} onClick={() => setTab('library')}>
+            Ma bibliothèque
           </button>
         </nav>
       </header>
 
-      {onglet === 'deposer' ? <EcranDepot /> : <Bibliotheque />}
+      {tab === 'submit' ? <SubmissionScreen /> : <Library />}
     </main>
   )
 }

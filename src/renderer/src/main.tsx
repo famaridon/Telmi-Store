@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import './app.css'
 
-const racine = document.getElementById('racine')
-if (!racine) throw new Error('Element #racine absent de index.html')
+const root = document.getElementById('root')
+if (!root) throw new Error('Missing #root element in index.html')
 
-createRoot(racine).render(
+createRoot(root).render(
   <StrictMode>
     <App />
   </StrictMode>

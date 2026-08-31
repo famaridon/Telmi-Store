@@ -1,16 +1,16 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'node:path'
-import { enregistrerIpc } from './ipc'
-import { declarerProtocole, servirProtocole } from './protocole'
-import { nettoyerTravail } from './telechargement'
+import { registerIpc } from './ipc'
+import { registerProtocolScheme, serveProtocol } from './protocol'
+import { clearWorkDir } from './download'
 
-const estDev = !app.isPackaged
+const isDev = !app.isPackaged
 
-// Doit preceder app.whenReady() : le scheme doit etre connu avant tout chargement.
-declarerProtocole()
+// Must run before app.whenReady(): the scheme has to be known before any load.
+registerProtocolScheme()
 
-const creerFenetre = (): void => {
-  const fenetre = new BrowserWindow({
+const createWindow = (): void => {
+  const window = new BrowserWindow({
     width: 1180,
     height: 820,
     minWidth: 960,
@@ -20,39 +20,39 @@ const creerFenetre = (): void => {
     title: 'Telmi Store',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      // Contrairement a Telmi-Sync, le renderer n'a AUCUN acces a Node.
-      // Voir docs/archi.md, section « Isolation du renderer ».
+      // Unlike Telmi-Sync, the renderer gets NO access to Node.
+      // See docs/archi.md, "Isolation du renderer".
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false
     }
   })
 
-  fenetre.on('ready-to-show', () => fenetre.show())
+  window.on('ready-to-show', () => window.show())
 
-  // Un lien externe s'ouvre dans le navigateur, jamais dans l'application.
-  fenetre.webContents.setWindowOpenHandler(({ url }) => {
+  // An external link opens in the browser, never inside the application.
+  window.webContents.setWindowOpenHandler(({ url }) => {
     void shell.openExternal(url)
     return { action: 'deny' }
   })
 
-  const urlDev = process.env['ELECTRON_RENDERER_URL']
-  if (estDev && urlDev) {
-    void fenetre.loadURL(urlDev)
+  const devUrl = process.env['ELECTRON_RENDERER_URL']
+  if (isDev && devUrl) {
+    void window.loadURL(devUrl)
   } else {
-    void fenetre.loadFile(join(__dirname, '../renderer/index.html'))
+    void window.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
 
 app.whenReady().then(async () => {
-  await nettoyerTravail()
-  servirProtocole()
+  await clearWorkDir()
+  serveProtocol()
 
-  enregistrerIpc()
-  creerFenetre()
+  registerIpc()
+  createWindow()
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) creerFenetre()
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
@@ -61,5 +61,5 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
-  void nettoyerTravail()
+  void clearWorkDir()
 })

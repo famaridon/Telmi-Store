@@ -1,49 +1,50 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
-import type { CanalEvenement, Canal, Evenements, Params, Reponse, Resultat } from '@shared/ipc'
-import { CANAUX, CANAUX_EVENEMENTS } from '@shared/ipc'
+import type { Channel, EventChannel, Events, Params, Result, ResultOf } from '@shared/ipc'
+import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/ipc'
+import type { FileKind } from '@shared/types'
 
 /**
- * Unique pont entre l'interface et le systeme. On n'expose pas `ipcRenderer` mais
- * des fonctions qui refusent tout canal absent du contrat : l'interface ne peut
- * donc pas inventer un appel.
+ * The single bridge between the interface and the system. We do not expose
+ * `ipcRenderer` but functions that reject any channel absent from the contract,
+ * so the interface cannot invent a call.
  */
-const invoquer = async <C extends Canal>(canal: C, params?: Params<C>): Promise<Resultat<Reponse<C>>> => {
-  if (!(CANAUX as readonly string[]).includes(canal)) {
-    return { ok: false, erreur: { code: 'ipc/canal-inconnu', message: 'Appel refuse.', details: canal } }
+const invoke = async <C extends Channel>(channel: C, params?: Params<C>): Promise<Result<ResultOf<C>>> => {
+  if (!(CHANNELS as readonly string[]).includes(channel)) {
+    return { ok: false, error: { code: 'ipc/unknown-channel', message: 'Appel refusé.', detail: channel } }
   }
-  return (await ipcRenderer.invoke(canal, params)) as Resultat<Reponse<C>>
+  return (await ipcRenderer.invoke(channel, params)) as Result<ResultOf<C>>
 }
 
 const api = {
-  bibliotheque: {
-    lister: () => invoquer('bibliotheque:lister')
+  library: {
+    list: () => invoke('library:list')
   },
 
-  fichiers: {
-    choisirAudios: () => invoquer('fichiers:choisir', { genre: 'audio', multiple: true }),
-    choisirImage: () => invoquer('fichiers:choisir', { genre: 'image', multiple: false }),
-    decrire: (chemins: string[], genre: 'audio' | 'image') => invoquer('fichiers:decrire', { chemins, genre }),
-    telecharger: (url: string, genre: 'audio' | 'image') => invoquer('fichiers:telecharger', { url, genre }),
+  files: {
+    pickAudios: () => invoke('files:pick', { kind: 'audio', multiple: true }),
+    pickImage: () => invoke('files:pick', { kind: 'image', multiple: false }),
+    describe: (paths: string[], kind: FileKind) => invoke('files:describe', { paths, kind }),
+    download: (url: string, kind: FileKind) => invoke('files:download', { url, kind }),
 
     /**
-     * Chemin d'un fichier obtenu par glisser-deposer. `webUtils` est la seule voie
-     * depuis qu'Electron a retire `File.path`, et elle doit etre appelee ici.
+     * Path of a dropped file. `webUtils` is the only way since Electron removed
+     * `File.path`, and it has to be called from here.
      */
-    chemin: (fichier: File) => webUtils.getPathForFile(fichier)
+    pathOf: (file: File) => webUtils.getPathForFile(file)
   },
 
-  /** Abonnement a un evenement pousse par le processus principal. Rend un desabonnement. */
-  sur: <C extends CanalEvenement>(canal: C, rappel: (donnees: Evenements[C]) => void): (() => void) => {
-    if (!(CANAUX_EVENEMENTS as readonly string[]).includes(canal)) return () => {}
-    const ecouteur = (_e: unknown, donnees: Evenements[C]): void => rappel(donnees)
-    ipcRenderer.on(canal, ecouteur)
-    return () => ipcRenderer.off(canal, ecouteur)
+  /** Subscribes to an event pushed by the main process. Returns an unsubscribe. */
+  on: <C extends EventChannel>(channel: C, callback: (data: Events[C]) => void): (() => void) => {
+    if (!(EVENT_CHANNELS as readonly string[]).includes(channel)) return () => {}
+    const listener = (_e: unknown, data: Events[C]): void => callback(data)
+    ipcRenderer.on(channel, listener)
+    return () => ipcRenderer.off(channel, listener)
   },
 
-  /** URL a donner a un <img> ou un <audio> pour un fichier autorise. */
-  urlFichier: (id: string) => `telmi-fichier://local/${id}`
+  /** URL to give an <img> or an <audio> for an allowed file. */
+  fileUrl: (id: string) => `${FILE_SCHEME}://local/${id}`
 } as const
 
-export type ApiTelmi = typeof api
+export type TelmiApi = typeof api
 
 contextBridge.exposeInMainWorld('telmi', api)

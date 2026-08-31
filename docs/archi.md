@@ -59,19 +59,19 @@ paramètres et sa réponse ; les trois cibles compilent contre ce même fichier,
 signature modifiée casse la compilation partout à la fois.
 
 ```ts
-export interface Requetes {
-  'bibliotheque:lister': { params: void; reponse: HistoireLocale[] }
+export interface Requests {
+  'library:list': { params: void; result: LocalStory[] }
 }
 ```
 
 ### Aucune exception ne traverse l'IPC ✅
 
-Tout canal renvoie un `Resultat<T>` :
+Tout canal renvoie un `Result<T>` :
 
 ```ts
-export type Resultat<T> =
-  | { ok: true; valeur: T }
-  | { ok: false; erreur: { code: string; message: string; details?: string } }
+export type Result<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: { code: string; message: string; detail?: string } }
 ```
 
 C'est une leçon tirée directement de Telmi-Sync : quand un store est mal formé, l'erreur
@@ -80,9 +80,9 @@ moyen** de savoir si le problème vient de son URL, de son JSON, du réseau ou d
 l'application. Un compteur qui tourne indéfiniment est le pire message d'erreur possible.
 
 D'où la règle : `message` est une phrase en français, affichable telle quelle, qui dit
-quoi faire ; `details` porte le technique ; `code` est stable et destiné au code.
-`enregistrerIpc()` enveloppe chaque gestionnaire pour qu'une exception échappée devienne
-malgré tout un `Resultat` non-ok.
+quoi faire ; `detail` porte le technique ; `code` est stable et destiné au code.
+`registerIpc()` enveloppe chaque gestionnaire pour qu'une exception échappée devienne
+malgré tout un `Result` non-ok.
 
 ## 3 bis. Voir et écouter sans donner accès au disque ✅
 
@@ -90,7 +90,7 @@ Le contributeur doit pouvoir **regarder sa couverture** et **écouter ses pistes
 proposer une histoire. Avec `contextIsolation`, le renderer n'a pas accès au système de
 fichiers, et une page servie par Vite ne peut pas charger de `file://`.
 
-D'où un protocole maison, `telmi-fichier://local/<identifiant>` :
+D'où un protocole maison, `telmi-file://local/<identifiant>` :
 
 - le processus principal tient une table des fichiers que le contributeur a
   **explicitement choisis** — sélecteur, glisser-déposer ou téléchargement ;
@@ -105,13 +105,24 @@ preload : c'est la seule voie depuis qu'Electron a retiré `File.path`.
 
 ### Une propriété heureuse de la CSP
 
-La CSP autorise `telmi-fichier:` dans `img-src` et `media-src`, mais **pas** dans
+La CSP autorise `telmi-file:` dans `img-src` et `media-src`, mais **pas** dans
 `connect-src`. Vérifié à l'exécution : un `<img>` et un `<audio>` chargent, un `fetch()`
 sur la même URL est refusé.
 
 L'interface peut donc **afficher** un fichier sans pouvoir en **lire les octets**. Ce
 n'était pas prémédité, mais c'est exactement la posture qu'on veut : les octets ne
 traversent jamais l'IPC ni le JavaScript de la page.
+
+### Convention de langue ✅
+
+**Le code est en anglais, les textes vus par l'utilisateur sont en français.**
+
+Identifiants, noms de fichiers, types, noms de canaux, classes CSS et commentaires :
+anglais. Seuls restent en français les `message` des `IpcError` et les libellés de
+l'interface — le public visé est francophone, et ces chaînes sont affichées telles quelles.
+
+C'est aussi ce qui rend le champ `message` reconnaissable : s'il est en anglais, c'est
+qu'il a été oublié.
 
 ## 4. Où vivent les appels GitHub
 
@@ -215,7 +226,7 @@ orthographié.
 
 **Règle absolue : `~/.telmi` appartient à Telmi-Sync. On lit, on n'écrit jamais.** ✅
 
-`src/main/bibliotheque.ts` lit `~/.telmi/stories/*/metadata.json` et en déduit titre,
+`src/main/library.ts` lit `~/.telmi/stories/*/metadata.json` et en déduit titre,
 uuid, version, âge, catégorie, poids et nombre de fichiers. Un dossier sans
 `metadata.json` lisible est ignoré en silence plutôt que de faire échouer la liste
 entière.
@@ -234,32 +245,32 @@ l'empreinte au téléchargement. C'est un durcissement, pas un prérequis.
 src/
 ├── shared/
 │   ├── types.ts          ✅ HistoireLocale, Fiche, Pack, StatutDroits
-│   └── ipc.ts            ✅ contrat, Resultat<T>
+│   └── ipc.ts            ✅ contrat, Result<T>
 ├── main/
 │   ├── index.ts          ✅ fenêtre, cycle de vie
 │   ├── ipc/index.ts      ✅ enregistrement, conversion des exceptions
-│   ├── bibliotheque.ts   ✅ lecture de ~/.telmi/stories
-│   ├── protocole.ts      ✅ telmi-fichier://, avec requêtes de plage
-│   ├── fichiers.ts       ✅ table des fichiers autorisés, description
-│   ├── selecteur.ts      ✅ sélecteur natif
-│   ├── telechargement.ts ✅ URL → fichier de travail, avec progression
+│   ├── library.ts   ✅ lecture de ~/.telmi/stories
+│   ├── protocol.ts      ✅ telmi-file://, avec requêtes de plage
+│   ├── files.ts       ✅ table des fichiers autorisés, description
+│   ├── picker.ts      ✅ sélecteur natif
+│   ├── download.ts ✅ URL → fichier de travail, avec progression
 │   ├── github/
 │   │   ├── auth.ts          Device Flow, stockage du jeton
-│   │   ├── depots.ts        création de dépôt, releases, envoi d'asset
-│   │   └── propositions.ts  fork, blobs, arbre, commit, pull request
+│   │   ├── repos.ts         création de dépôt, releases, envoi d'asset
+│   │   └── pulls.ts         fork, blobs, arbre, commit, pull request
 │   ├── store/
-│   │   ├── fiche.ts         fabrication et validation d'une fiche
-│   │   ├── empreinte.ts     sha256 et taille d'un pack
-│   │   └── annuaire.ts      liste des stores connus
+│   │   ├── entry.ts         fabrication et validation d'une fiche
+│   │   ├── checksum.ts      sha256 et taille d'un pack
+│   │   └── directory.ts     liste des stores connus
 │   └── pack/
-│       └── archive.ts       zip d'un dossier de ~/.telmi/stories
+│       └── archive.ts       zip d'un pack fabriqué
 └── renderer/src/
     ├── App.tsx           ✅ onglets
-    ├── Bibliotheque.tsx  ✅ voie secondaire : une histoire déjà fabriquée
-    ├── depot/            ✅ l'écran de dépôt : pistes, histoire, droits, récapitulatif
-    ├── fabrique/            génération du pack (lot 2)
-    ├── proposer/            dépôt GitHub, release, pull request, suivi
-    └── moderer/             propositions ouvertes, écouter, accepter, refuser
+    ├── Library.tsx  ✅ voie secondaire : une histoire déjà fabriquée
+    ├── submission/            ✅ l'écran de dépôt : pistes, histoire, droits, récapitulatif
+    ├── build/            génération du pack (lot 2)
+    ├── submit/            dépôt GitHub, release, pull request, suivi
+    └── moderate/             propositions ouvertes, écouter, accepter, refuser
 ```
 
 ## 9. Décisions et compromis
@@ -268,7 +279,7 @@ src/
 | --- | --- | --- |
 | Application séparée, pas un patch de Telmi-Sync | Telmi-Sync est le projet de quelqu'un d'autre, et rien n'exige de le modifier | deux applications à installer |
 | `contextIsolation` activé | un jeton GitHub circule ici | un peu de cérémonie à chaque nouveau canal |
-| `Resultat<T>` plutôt que des exceptions | un utilisateur doit toujours savoir ce qui a échoué | plus verbeux qu'un `throw` |
+| `Result<T>` plutôt que des exceptions | un utilisateur doit toujours savoir ce qui a échoué | plus verbeux qu'un `throw` |
 | API REST plutôt que git embarqué | pas de clone d'un dépôt de plusieurs centaines de mégaoctets | pas d'usage hors ligne |
 | Le pack reste chez son auteur | le store n'héberge aucune œuvre : un retrait supprime un lien | le lien peut mourir |
 | Empreinte obligatoire | un asset est remplaçable sous le même tag | à recalculer à chaque version |

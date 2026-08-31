@@ -31,7 +31,7 @@ Studio de Telmi-Sync.
 ## Lot 0 — Acquis ✅
 
 Coquille Electron + React + TypeScript, trois cibles typées. Renderer isolé, CSP. Contrat
-d'IPC unique où tout canal renvoie un `Resultat<T>`.
+d'IPC unique où tout canal renvoie un `Result<T>`.
 
 Lecture en seule lecture de `~/.telmi/stories`. **Ce n'est plus le chemin principal** : ça
 devient une voie secondaire, « proposer une histoire déjà fabriquée », utile à qui a déjà

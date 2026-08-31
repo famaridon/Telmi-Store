@@ -1,7 +1,7 @@
-import type { ApiTelmi } from './index'
+import type { TelmiApi } from './index'
 
 declare global {
   interface Window {
-    telmi: ApiTelmi
+    telmi: TelmiApi
   }
 }

@@ -1,48 +1,48 @@
 import { BrowserWindow, ipcMain } from 'electron'
-import type { Canal, Params, Reponse, Resultat } from '@shared/ipc'
-import { listerBibliotheque } from '../bibliotheque'
-import { decrirePlusieurs } from '../fichiers'
-import { choisir } from '../selecteur'
-import { telecharger } from '../telechargement'
+import type { Channel, Params, Result, ResultOf } from '@shared/ipc'
+import { listLibrary } from '../library'
+import { describeAll } from '../files'
+import { pick } from '../picker'
+import { download } from '../download'
 
 /**
- * Enregistre un canal en garantissant qu'aucune exception ne traverse l'IPC :
- * tout ce qui echappe est converti en Resultat non-ok, avec un message lisible.
+ * Registers a channel while guaranteeing that no exception crosses the IPC
+ * boundary: anything escaping becomes a non-ok Result with a readable message.
  */
-const gerer = <C extends Canal>(
-  canal: C,
-  traitement: (params: Params<C>) => Promise<Resultat<Reponse<C>>>
+const handle = <C extends Channel>(
+  channel: C,
+  work: (params: Params<C>) => Promise<Result<ResultOf<C>>>
 ): void => {
-  ipcMain.handle(canal, async (_evenement, params: Params<C>): Promise<Resultat<Reponse<C>>> => {
+  ipcMain.handle(channel, async (_event, params: Params<C>): Promise<Result<ResultOf<C>>> => {
     try {
-      return await traitement(params)
+      return await work(params)
     } catch (e) {
       return {
         ok: false,
-        erreur: {
-          code: 'interne/inattendu',
+        error: {
+          code: 'internal/unexpected',
           message:
-            'Une erreur inattendue est survenue. Si elle se reproduit, signale-la avec le detail ci-dessous.',
-          details: e instanceof Error ? `${e.name}: ${e.message}` : String(e)
+            'Une erreur inattendue est survenue. Si elle se reproduit, signale-la avec le détail ci-dessous.',
+          detail: e instanceof Error ? `${e.name}: ${e.message}` : String(e)
         }
       }
     }
   })
 }
 
-/** La fenetre courante, resolue a l'appel : les handlers ne sont enregistres qu'une fois. */
-const fenetreCourante = (): BrowserWindow | null =>
+/** The current window, resolved at call time: handlers are registered only once. */
+const currentWindow = (): BrowserWindow | null =>
   BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0] ?? null
 
-export const enregistrerIpc = (): void => {
-  gerer('bibliotheque:lister', listerBibliotheque)
-  gerer('fichiers:choisir', ({ genre, multiple }) => choisir(genre, multiple))
-  gerer('fichiers:decrire', ({ chemins, genre }) => decrirePlusieurs(chemins, genre))
-  gerer('fichiers:telecharger', ({ url, genre }) =>
-    telecharger(url, genre, (recu, total) => {
-      const fenetre = fenetreCourante()
-      if (fenetre !== null && !fenetre.isDestroyed()) {
-        fenetre.webContents.send('telechargement:progression', { url, recu, total })
+export const registerIpc = (): void => {
+  handle('library:list', listLibrary)
+  handle('files:pick', ({ kind, multiple }) => pick(kind, multiple))
+  handle('files:describe', ({ paths, kind }) => describeAll(paths, kind))
+  handle('files:download', ({ url, kind }) =>
+    download(url, kind, (received, total) => {
+      const window = currentWindow()
+      if (window !== null && !window.isDestroyed()) {
+        window.webContents.send('download:progress', { url, received, total })
       }
     })
   )

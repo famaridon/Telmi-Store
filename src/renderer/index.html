@@ -4,19 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!--
-      Le renderer ne charge rien depuis le reseau. `telmi-fichier:` est le protocole
-      maison qui sert les fichiers que le contributeur a explicitement choisis :
-      c'est ce qui lui permet de voir sa couverture et d'ecouter ses pistes sans
-      qu'on ouvre l'acces au disque.
+      The renderer loads nothing from the network. `telmi-file:` is our own
+      protocol, serving the files the contributor explicitly picked: it is what
+      lets them see the cover and play the tracks without opening disk access.
+
+      Note it is allowed in img-src and media-src but NOT in connect-src, so the
+      interface can render a file without being able to read its bytes.
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' data: telmi-fichier:; media-src 'self' telmi-fichier:; style-src 'self' 'unsafe-inline'"
+      content="default-src 'self'; img-src 'self' data: telmi-file:; media-src 'self' telmi-file:; style-src 'self' 'unsafe-inline'"
     />
     <title>Telmi Store</title>
   </head>
   <body>
-    <div id="racine"></div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
