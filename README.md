@@ -7,6 +7,27 @@ C'est le compagnon de [Telmi-Sync](https://github.com/DantSu/Telmi-Sync) : Telmi
 fabrique et transfère les packs vers la conteuse, Telmi Store s'occupe de les publier et
 de les faire circuler.
 
+## Dix histoires plutôt que cinq cents
+
+**L'objectif n'est pas la taille du catalogue, c'est qu'un enfant redemande l'histoire.**
+
+Mieux vaut dix histoires réclamées le soir que cinq cents podcasts que l'enfant zappe
+fébrilement. Un enfant qui zappe est un enfant qui n'a rien trouvé — et une conteuse qui
+propose trois cents entrées ne l'aide pas à choisir, elle l'écrase.
+
+La quantité, d'ailleurs, est un problème déjà résolu : Telmi-Sync donne accès en deux clics
+à un annuaire de **174 flux de podcasts**. Personne n'a manqué de contenu. Ce qui manque,
+c'est le tri.
+
+Ce projet part donc d'un renversement : **la modération n'est pas un goulot administratif à
+minimiser, c'est le produit.** On rend le dépôt facile précisément pour que la relecture
+puisse rester exigeante. Refuser une proposition est un acte normal, fréquent et attendu —
+l'application doit rendre « non, et voici pourquoi » aussi simple que « oui ».
+
+C'est aussi la raison pour laquelle un store est un dépôt git avec des *pull requests* et
+non un formulaire qui publie : la curation devient un acte traçable, discutable, et
+réversible.
+
 ## Le problème
 
 Créer un store Telmi demande aujourd'hui une organisation GitHub, un dépôt de
@@ -28,6 +49,10 @@ deux stores étrangers plafonnent à une et deux histoires. Le seul store vivant
 maintenu par l'auteur de la procédure, c'est-à-dire par la personne pour qui la friction
 est nulle.
 
+Le problème n'est pas qu'il y ait peu d'histoires : c'est que **la friction filtre les
+mauvaises personnes**. Elle n'écarte pas le contenu médiocre, elle écarte le parent, la
+bibliothécaire ou l'institutrice qui auraient apporté les dix histoires qui comptent.
+
 Or le format attendu par Telmi-Sync est trivial : un `GET` qui renvoie
 `{banner, data[]}`. Toute cette procédure n'existe que pour produire un fichier JSON
 statique. **La complexité n'est pas dans le besoin, elle est dans la tuyauterie.**
@@ -44,7 +69,8 @@ en relecture, acceptée, refusée — sans quitter l'application.
 *Écouter* installe le pack localement, *Accepter* fusionne, *Refuser* ferme avec un
 commentaire. Aucun pack à fabriquer, aucun fichier à transférer, aucune ligne de commande.
 
-**Pour tout le monde.** Une raison de ne pas relire un diff de 584 fichiers binaires.
+**Pour tout le monde.** Un store dont chaque entrée a été écoutée par quelqu'un avant
+d'y figurer.
 
 ## Ce que ce n'est pas
 

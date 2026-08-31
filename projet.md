@@ -1,125 +1,204 @@
 # Découpage du projet
 
 Ce document dit **quoi faire, dans quel ordre, et comment savoir que c'est fini.**
-L'architecture cible est dans [docs/archi.md](docs/archi.md) ; l'objectif dans
-[README.md](README.md).
+L'objectif est dans [README.md](README.md), l'architecture cible dans
+[docs/archi.md](docs/archi.md), et le format à produire — relevé sur un pack réel — dans
+[docs/format-pack.md](docs/format-pack.md).
 
 Chaque lot porte un critère d'acceptation vérifiable. Quand c'est possible, ce critère
 s'appuie sur le validateur déjà écrit et testé dans
-[telmi-store-dev](https://github.com/famaridon/telmi-store-dev) — inutile d'inventer un
+[telmi-store-dev](https://github.com/famaridon/telmi-store-dev) : inutile d'inventer un
 juge, on en a un.
 
 Tailles : **S** une soirée · **M** un week-end · **L** plusieurs sessions.
+
+## Le parti pris
+
+**On part d'un écran, pas du disque.** Un contributeur qui a un mp3 ne doit pas avoir à
+installer Telmi-Sync, importer, fabriquer, puis publier. Il remplit un formulaire, dépose
+ses fichiers, et c'est tout : **Telmi Store fabrique le pack lui-même.**
+
+Conséquence : pour contribuer, **Telmi-Sync n'est plus nécessaire.** C'est la différence
+entre une contribution qui demande une chaîne d'outils et une contribution qui demande un
+après-midi.
+
+**On ne fabrique que des packs « liste audio »** — un mp3 seul, ou plusieurs chapitres.
+Les histoires interactives, avec leurs graphes de centaines de nœuds, restent le métier du
+Studio de Telmi-Sync.
 
 ---
 
 ## Lot 0 — Acquis ✅
 
-Coquille Electron + React + TypeScript, trois cibles typées. Renderer isolé, CSP.
-Contrat d'IPC unique où tout canal renvoie un `Resultat<T>`. Lecture en seule lecture de
-`~/.telmi/stories` avec signalement des histoires en `version: 0`.
+Coquille Electron + React + TypeScript, trois cibles typées. Renderer isolé, CSP. Contrat
+d'IPC unique où tout canal renvoie un `Resultat<T>`.
+
+Lecture en seule lecture de `~/.telmi/stories`. **Ce n'est plus le chemin principal** : ça
+devient une voie secondaire, « proposer une histoire déjà fabriquée », utile à qui a déjà
+des packs — et l'écran qui rend visible le bug des `version: 0`.
 
 ---
 
-## Lot 1 — Pack : archive, empreinte, correction du `metadata.json`
+## Lot 1 — Déposer : l'écran d'entrée
 
-**Taille : M.** Prérequis de tout le reste, aucune dépendance.
+**Taille : M.** Dépend de : rien. C'est la porte d'entrée de tout le projet.
 
-Fabriquer, depuis un dossier de `~/.telmi/stories`, un zip publiable, et en connaître
-l'empreinte.
+Un seul écran, qui doit être franchissable par un parent ou une institutrice.
 
-- [ ] Zipper un dossier d'histoire en conservant les quatre fichiers marqueurs
-      (`metadata.json`, `nodes.json`, `title.mp3`, `title.png`) dans un même dossier
-- [ ] Calculer `sha256` et `taille` du zip produit
-- [ ] **Corriger `version` à la volée dans le `metadata.json` de l'archive** quand elle
-      vaut 0 ou est absente, sans jamais toucher au fichier d'origine
-- [ ] Afficher le poids du pack et prévenir quand il dépasse 2 Gio (limite d'un asset)
+- [ ] **Un mp3 seul** ou **plusieurs chapitres**, au choix, sans que le second cas
+      complique le premier
+- [ ] Chaque chapitre vient d'un **fichier local** (glisser-déposer ou sélecteur) **ou
+      d'une URL**
+- [ ] Réordonner les chapitres, en renommer un, en retirer un
+- [ ] Lire durée, échantillonnage et nombre de canaux de chaque audio, et **prévenir**
+      quand on sort du 44 100 Hz stéréo
+- [ ] Champs du pack : titre, âge, catégorie, langue, description, **question du menu**
+      (« Quelle histoire veux-tu écouter ? »)
+- [ ] Couverture obligatoire : fichier ou URL
+- [ ] Image par chapitre, facultative — à défaut, la couverture
+- [ ] Bloc **droits** obligatoire : statut, source, déclarant
+- [ ] Aperçu avant fabrication : la liste des chapitres avec leurs durées et le poids total
 
-**Critère d'acceptation.** Le zip produit passe le validateur :
-```sh
-TELMI_SYNC=../Telmi-Sync node ../telmi-store-dev/outils/valider-store.mjs <url> --installer
-```
-avec un `FORMAT_TELMI detecte` et une installation réussie.
+**Critère d'acceptation.** Depuis un dossier de mp3 quelconque, on remplit l'écran et on
+arrive au bout sans jamais ouvrir un terminal ni un éditeur de texte.
 
 **Points d'attention.**
-- Node n'a pas de zip natif. Une dépendance est nécessaire — `yazl` (minimal, streaming)
-  plutôt qu'`archiver` (beaucoup plus gros pour ce qu'on en fait).
-- La correction du `metadata.json` résout proprement le bug des dix histoires du store
-  officiel bloquées en `version: 0` : la règle « ne jamais écrire dans `~/.telmi` » est
-  respectée puisqu'on ne modifie que l'archive, et l'`uuid`/`version` de la fiche reste
-  cohérent avec le pack livré. **C'est la bonne place pour ce correctif.**
-- `ConvertZip.js` exige *exactement* quatre marqueurs : une histoire qui en manque un doit
-  être refusée avec un message qui dit lequel.
+- Le téléchargement d'une URL se fait dans le processus principal, pas dans le renderer :
+  ni CORS ni jeton à exposer.
+- Une URL peut être longue à répondre ou mentir sur son type. Message clair, jamais un
+  compteur qui tourne.
+- **Le poids total conditionne tout le reste** : au-delà de 2 Gio, aucun asset de release
+  ne l'acceptera. À afficher tôt, pas à la fin.
+
+**Deuxième itération, à ne pas engager d'emblée.** Coller l'**URL d'un flux RSS** et
+laisser l'application proposer les épisodes à cocher. C'est le geste le plus naturel pour
+un podcast, et c'est ce qui a produit les stores existants — mais ça double le lot.
 
 ---
 
-## Lot 2 — Connexion GitHub par Device Flow
+## Lot 2 — Fabriquer le pack
 
-**Taille : M.** Dépend de : rien. Peut être mené en parallèle du lot 1.
+**Taille : M.** Dépend de : lot 1. C'est le cœur technique.
 
-- [ ] `POST /login/device/code`, puis attente active selon l'`interval` renvoyé
-- [ ] Traiter les quatre réponses d'attente : `authorization_pending`, `slow_down`,
-      `expired_token`, `access_denied` — chacune avec son message
-- [ ] Stocker le jeton avec `safeStorage` d'Electron, hors du renderer
-- [ ] Écran : le code à saisir, un bouton qui ouvre `github.com/login/device`, l'état
-- [ ] Se déconnecter, et effacer le jeton
+Produire l'arborescence décrite dans [docs/format-pack.md](docs/format-pack.md), à
+l'octet près.
+
+- [ ] Générer `nodes.json` pour N chapitres — le graphe est entièrement mécanique, y
+      compris le bouclage du dernier chapitre sur l'index 0
+- [ ] Générer `metadata.json` avec **`version` ≥ 1** et un `uuid` stable, et `notes.json`
+- [ ] Générer les images : `cover.png` 512 × 512, `title.png` et `images/m<n>.png`
+      640 × 480, titre incrusté
+- [ ] Recopier les audios des chapitres en `audios/s<n>.mp3`
+- [ ] Zipper, calculer `sha256` et `taille`
+
+**Critère d'acceptation.** Le zip produit passe le validateur, jusqu'à l'installation :
+
+```sh
+TELMI_SYNC=../Telmi-Sync \
+  node ../telmi-store-dev/outils/valider-store.mjs <url-du-store-local> --installer
+```
+
+`FORMAT_TELMI detecte` puis `histoire installee`. Puis, une fois au moins, **écouter le
+pack sur une vraie conteuse** : c'est le seul juge du format audio.
+
+**Décision structurante : aucun binaire externe.** Tout est faisable en JavaScript pur et
+avec les API de Chromium, ce qui évite de télécharger ffmpeg comme le fait Telmi-Sync :
+
+| Besoin | Moyen | Dépendance |
+| --- | --- | --- |
+| Décoder, mesurer, valider un audio | Web Audio API | aucune |
+| Générer les images avec du texte | `<canvas>` puis `toBlob('image/png')` | aucune |
+| Créer un mp3 court | `lamejs` | pure JS, ~100 Ko |
+| Zipper | `yazl` | pure JS, streaming |
+
+Le renderer génère les images sur un canvas — le contributeur **voit** ce qu'il va
+publier — et envoie les octets au processus principal. Les mp3 des chapitres sont recopiés
+sans ré-encodage : c'est le gros du poids, et le format de référence montre que le débit
+n'est pas contraint.
+
+**Points d'attention.**
+- `ConvertZip.js` exige *exactement quatre* fichiers marqueurs. Un pack qui en manque un
+  est rejeté sans explication : la fabrication doit les garantir.
+- Le passe-plat audio est le pari du lot. S'il échoue sur matériel, il faudra un encodeur —
+  et là, ffmpeg redevient nécessaire. **À tester tôt.**
+
+---
+
+## Lot 3 — Les titres dits à voix haute
+
+**Taille : M.** Dépend de : lot 2. **Peut être livré après un premier jet muet.**
+
+Le format prévoit `title.mp3`, `q.mp3` et un `m<n>.mp3` par chapitre : le titre du pack,
+la question, et le titre de chaque chapitre, dits à voix haute. C'est ce qui rend la
+conteuse utilisable par un enfant **qui ne lit pas encore** — et la cible affichée des
+sources collectées est le Cycle 1, donc 3 à 6 ans.
+
+Trois voies, à trancher :
+
+| Voie | Coût | Ce que ça donne |
+| --- | --- | --- |
+| **Silence** — `audio: null` sur les `m<n>`, pas de `q.mp3` | nul | valide, mais l'enfant doit lire l'image. Mauvais pour la cible |
+| **Micro** — le contributeur dit les titres dans l'application | faible : `MediaRecorder` + `lamejs`, aucun binaire | la voix d'un parent. Plus chaleureux que n'importe quelle synthèse |
+| **Piper** — la même synthèse que Telmi-Sync | fort : télécharger binaire et voix (~50 à 80 Mo) | homogène avec les packs officiels, automatisable |
+
+**Recommandation : le silence comme filet, le micro comme chemin conseillé.** Les deux ne
+demandent aucun binaire, donc les deux tiennent dans ce lot. Dire cinq titres au micro
+prend deux minutes, et le résultat est meilleur qu'une synthèse. Piper devient utile le
+jour où quelqu'un publie trente chapitres d'un coup — au lot 10.
+
+**Critère d'acceptation.** Un pack fabriqué avec titres enregistrés s'installe, et les
+titres s'entendent au bon moment sur la conteuse.
+
+---
+
+## Lot 4 — Connexion GitHub par Device Flow
+
+**Taille : M.** Dépend de : rien. Bon candidat pour un soir où l'envie est ailleurs.
+
+- [ ] `POST /login/device/code`, puis attente selon l'`interval` renvoyé
+- [ ] Traiter `authorization_pending`, `slow_down`, `expired_token`, `access_denied` —
+      chacun avec son message
+- [ ] Stocker le jeton avec `safeStorage`, hors du renderer
+- [ ] Écran : le code à saisir, un bouton vers `github.com/login/device`, l'état
+- [ ] Se déconnecter et effacer le jeton
 
 **Critère d'acceptation.** Se connecter, fermer l'application, la relancer : on est
-toujours connecté et le nom du compte s'affiche. Aucun jeton en clair sur le disque.
+toujours connecté, le nom du compte s'affiche, et aucun jeton n'est en clair sur le disque.
 
-**Points d'attention.**
-- **Prérequis humain** : créer une OAuth App GitHub pour obtenir un `client_id`. Voir
-  « Prérequis hors code » plus bas.
-- Portée `public_repo`, rien de plus. Le refuser explicitement si GitHub en accorde moins.
-- Le jeton ne doit jamais transiter par l'IPC vers le renderer, même pour affichage.
+**Points d'attention.** Portée `public_repo`, rien de plus. Le jeton ne doit jamais
+traverser l'IPC vers le renderer, même pour affichage. Prérequis humain : créer l'OAuth
+App — voir plus bas.
 
 ---
 
-## Lot 3 — Fiche : formulaire, droits, validation
+## Lot 5 — Fiche et publication du pack
 
-**Taille : S.** Dépend de : lot 1 (pour `sha256` et `taille`).
+**Taille : M.** Dépend de : lots 2 et 4.
 
-- [ ] Formulaire : titre, âge, catégorie, langue, description
-- [ ] Bloc droits : statut parmi les cinq valeurs, source, déclarant — **obligatoire**
-- [ ] Générer le `slug` depuis le titre, et vérifier qu'il est libre dans le store visé
-- [ ] Valider côté application avec les mêmes règles que `verifier-fiches.mjs`
-- [ ] Aperçu de la fiche JSON avant envoi
-
-**Critère d'acceptation.** La fiche produite est acceptée par
-`node outils/verifier-fiches.mjs` du dépôt de store, sans retouche manuelle.
-
-**Points d'attention.** La déclaration de droits est le seul garde-fou avant la modération
-humaine : elle ne doit pas pouvoir être contournée, ni pré-remplie par défaut sur une
-valeur permissive.
-
----
-
-## Lot 4 — Publier le pack chez le contributeur
-
-**Taille : M.** Dépend de : lots 1 et 2.
-
-- [ ] Créer le dépôt d'accueil (`POST /user/repos`), ou réutiliser celui qui existe
+- [ ] Construire la fiche depuis le formulaire, avec `sha256`, `taille`, `uuid`, `version`
+- [ ] Générer le `slug` et vérifier qu'il est libre dans le store visé
+- [ ] Créer le dépôt d'accueil chez le contributeur, ou réutiliser l'existant
 - [ ] Créer la release taguée `<slug>-<version>`, jamais `latest`
-- [ ] Envoyer l'asset, avec une barre de progression
+- [ ] Envoyer l'asset avec une barre de progression
 - [ ] Vérifier après envoi que l'URL publique répond et que le `sha256` correspond
 
-**Critère d'acceptation.** Le pack est téléchargeable par une URL publique, et le
-`sha256` téléchargé est identique à celui de la fiche.
+**Critère d'acceptation.** La fiche est acceptée par `outils/verifier-fiches.mjs` du dépôt
+de store sans retouche, et le pack est téléchargeable par une URL publique dont
+l'empreinte correspond.
 
-**Points d'attention.**
-- **Idempotence.** Relancer une publication qui a échoué à mi-chemin ne doit pas créer un
-  second dépôt ni une release en double.
-- Un asset de 183 Mo sur une connexion domestique, c'est plusieurs minutes : la reprise
-  sur erreur peut attendre le lot 9, mais l'échec doit être clair et l'état récupérable.
+**Points d'attention.** **Idempotence** : relancer une publication interrompue ne doit
+créer ni second dépôt ni release en double. Un asset de plusieurs centaines de mégaoctets
+prend plusieurs minutes sur une ligne domestique : l'échec doit être lisible et l'état
+récupérable.
 
 ---
 
-## Lot 5 — Proposer : la pull request
+## Lot 6 — Proposer : la pull request
 
-**Taille : M.** Dépend de : lots 3 et 4.
+**Taille : M.** Dépend de : lot 5.
 
-- [ ] `POST /repos/{store}/forks`, en attendant que le fork soit réellement prêt
-- [ ] Réutiliser et resynchroniser un fork déjà existant
+- [ ] `POST /repos/{store}/forks`, en attendant que le fork réponde réellement
+- [ ] Réutiliser et resynchroniser un fork existant
 - [ ] `POST /git/blobs` pour la fiche et la vignette
 - [ ] `POST /git/trees` → `/git/commits` → `PATCH /git/refs/heads/<branche>`
 - [ ] `POST /repos/{store}/pulls`, avec un corps qui reprend la fiche en clair
@@ -127,20 +206,21 @@ valeur permissive.
 **Critère d'acceptation.** Une pull request apparaît sur `telmi-store-dev` avec exactement
 deux fichiers ajoutés, et l'Action de validation passe au vert dessus.
 
-**Points d'attention.**
-- Le fork est **asynchrone** chez GitHub : créer un blob juste après échoue parfois. Il
-  faut attendre que le dépôt réponde avant de continuer.
-- Une branche par proposition, nommée d'après le `slug`, pour permettre plusieurs
-  propositions simultanées.
+**Points d'attention.** Le fork est **asynchrone** chez GitHub : créer un blob juste après
+échoue parfois. Une branche par proposition, nommée d'après le `slug`.
+
+**C'est ici le premier jalon démontrable.** À la fin de ce lot, une proposition part
+réellement : c'est le moment d'en parler à DantSu, avec une vraie PR sur un vrai store
+plutôt qu'un plan.
 
 ---
 
-## Lot 6 — Suivre sa proposition
+## Lot 7 — Suivre sa proposition
 
-**Taille : S.** Dépend de : lot 5.
+**Taille : S.** Dépend de : lot 6.
 
 - [ ] Lister les pull requests ouvertes par l'utilisateur sur les stores connus
-- [ ] Afficher l'état : en relecture, acceptée, refusée — avec les commentaires reçus
+- [ ] Afficher l'état — en relecture, acceptée, refusée — avec les commentaires reçus
 - [ ] Rouvrir le formulaire pour corriger et repousser sur la même branche
 
 **Critère d'acceptation.** Refuser une PR de test avec un commentaire : l'application
@@ -148,72 +228,76 @@ l'affiche comme refusée et montre le commentaire, sans que l'utilisateur ouvre 
 
 ---
 
-## Lot 7 — Modérer
+## Lot 8 — Modérer
 
-**Taille : L.** Dépend de : lots 2 et 6. C'est le lot qui porte la valeur.
+**Taille : L.** Dépend de : lots 4 et 7. C'est le lot qui porte la valeur.
 
 - [ ] Lister les propositions ouvertes du store, si l'utilisateur y a les droits
 - [ ] Afficher la fiche proprement, droits en évidence
-- [ ] **Écouter** : télécharger le pack, vérifier son empreinte, le lire dans
-      l'application
-- [ ] **Accepter** : fusionner la PR — l'Action régénère l'index
-- [ ] **Refuser** : fermer avec un commentaire
+- [ ] **Écouter** : télécharger le pack, vérifier l'empreinte, le lire dans l'application
+- [ ] **Accepter** : fusionner — l'Action régénère l'index
+- [ ] **Refuser** : fermer avec un commentaire — geste de premier plan, pas une porte de
+      sortie. Proposer des motifs fréquents pour qu'un refus argumenté coûte trois clics
 
-**Critère d'acceptation.** Boucle complète sur `telmi-store-dev` : une proposition envoyée
+**Critère d'acceptation.** Boucle complète sur `telmi-store-dev` : proposition envoyée
 depuis un compte, écoutée puis acceptée depuis l'autre, et l'histoire apparaît dans
-Telmi-Sync après rafraîchissement du store.
+Telmi-Sync après rafraîchissement du store. Puis la même boucle avec un **refus argumenté**,
+qui doit être aussi rapide qu'une acceptation.
 
-**Décision ouverte — voir plus bas.** Écouter en installant dans `~/.telmi` violerait la
-règle de non-écriture. La recommandation est un lecteur intégré, qui décompresse dans un
-dossier temporaire et joue les audios dans l'ordre de `nodes.json`. C'est plus de travail,
-mais un modérateur ne veut pas voir sa bibliothèque polluée par des propositions qu'il
-refuse.
+**Ce lot porte l'objectif du projet.** Un store se juge sur ce qu'il a refusé autant que
+sur ce qu'il publie : voir « Dix histoires plutôt que cinq cents » dans le README.
+
+**Décision ouverte.** Installer dans `~/.telmi` pour écouter violerait la règle de
+non-écriture et polluerait la bibliothèque du modérateur avec des propositions qu'il
+refuse. Recommandation : un lecteur intégré, réduit au minimum — décompresser en dossier
+temporaire et jouer les audios dans l'ordre de `nodes.json`. Le lot 2 aura de toute façon
+appris à lire ce fichier.
 
 ---
 
-## Lot 8 — Annuaire de stores
+## Lot 9 — Annuaire de stores
 
-**Taille : S.** Dépend de : rien de fonctionnel, utile dès le lot 5.
+**Taille : S.** Dépend de : rien. Utile dès le lot 6.
 
 - [ ] Charger un `stores.json` distant : nom, langue, description, URL, dépôt
-- [ ] Écran « Découvrir » avec ajout en un clic
-- [ ] Mémoriser les stores choisis
+- [ ] Écran « Découvrir », ajout en un clic, mémorisation des choix
 
 **Critère d'acceptation.** Ajouter une entrée dans l'annuaire distant, sans publier de
 nouvelle version de l'application : elle apparaît au démarrage suivant.
 
 **Pourquoi ça compte.** Les stores anglais et chinois existent depuis un an et **aucun
-utilisateur ne les a jamais vus**, parce qu'il faut fouiller le wiki pour trouver leur
-URL. Un store invisible ne reçoit pas de contribution.
+utilisateur ne les a jamais vus**, parce qu'il faut fouiller le wiki pour trouver leur URL.
+Un store invisible ne reçoit pas de contribution.
 
 ---
 
-## Lot 9 — Durcissement et suites
+## Lot 10 — Durcissement et suites
 
-**Taille : variable.** À n'engager qu'une fois la boucle complète en service.
+**Taille : variable.** À n'engager qu'une fois la boucle en service.
 
 - [ ] Reprise sur erreur pour les envois d'assets volumineux
-- [ ] Absorber le collecteur `telmi-collecte.py` : collecter, fabriquer, proposer d'un
-      seul geste
+- [ ] **Piper** pour la synthèse des titres, quand le micro ne suffit plus
+- [ ] Import d'un flux RSS complet (la deuxième itération du lot 1)
+- [ ] Absorber `telmi-collecte.py` : collecter, fabriquer, proposer d'un seul geste
 - [ ] **Proposer à Telmi-Sync** la vérification de l'empreinte au téléchargement — le seul
-      point de tout le plan qui demande une modification chez DantSu
-- [ ] **Proposer à Telmi-Sync** l'encodage `pal8` des images d'étape : un seul drapeau
-      ffmpeg, 5,1 × sur 76 % du poids d'un pack, sans changer de format
+      point du plan qui demande une modification chez DantSu
+- [ ] **Proposer à Telmi-Sync** l'encodage `pal8` des images d'étape : un drapeau ffmpeg,
+      5,1 × sur 76 % du poids d'un pack interactif
 
 ---
 
 ## Lot T — Tests
 
-**Taille : S** pour la mise en place, puis continu.
+**Taille : S** pour la mise en place, puis continu. **À mener pendant le lot 2.**
 
-- [ ] Installer Vitest, un script `npm test`
-- [ ] Couvrir la logique pure : validation de fiche, calcul d'empreinte, génération de
-      slug, correction du `metadata.json`, lecture de `nodes.json`
-- [ ] Ne pas chercher à couvrir les appels GitHub par des bouchons : les valider contre
-      `telmi-store-dev`, qui est fait pour ça
+- [ ] Vitest, un script `npm test`
+- [ ] Couvrir la logique pure : génération de `nodes.json` pour 1, 2 et N chapitres,
+      bouclage du dernier chapitre, présence des quatre marqueurs, empreinte, slug,
+      validation de fiche
+- [ ] Ne pas bouchonner les appels GitHub : les valider contre `telmi-store-dev`
 
-À faire pendant le lot 1, pas après : la logique du lot 1 est la plus testable de tout
-le projet, et c'est celle dont tout le reste dépend.
+La génération de `nodes.json` est la fonction la plus testable du projet et celle dont
+tout dépend : un graphe mal câblé donne un pack qui s'installe et ne fonctionne pas.
 
 ---
 
@@ -221,72 +305,68 @@ le projet, et c'est celle dont tout le reste dépend.
 
 ```mermaid
 flowchart TD
-  L0["Lot 0 · Acquis ✅"] --> L1["Lot 1 · Pack<br/>archive, empreinte"]
-  L0 --> L2["Lot 2 · GitHub<br/>Device Flow"]
-  L1 --> L3["Lot 3 · Fiche<br/>formulaire, droits"]
-  L1 --> L4["Lot 4 · Publier<br/>dépôt + release"]
-  L2 --> L4
-  L3 --> L5["Lot 5 · Proposer<br/>pull request"]
+  L0["Lot 0 · Acquis ✅"] --> L1["Lot 1 · Déposer<br/>formulaire, mp3, URL"]
+  L1 --> L2["Lot 2 · Fabriquer<br/>nodes.json, images, zip"]
+  L2 --> L3["Lot 3 · Titres à voix haute<br/>silence ou micro"]
+  L0 --> L4["Lot 4 · GitHub<br/>Device Flow"]
+  L2 --> L5["Lot 5 · Fiche<br/>+ publication du pack"]
   L4 --> L5
-  L5 --> L6["Lot 6 · Suivre"]
-  L6 --> L7["Lot 7 · Modérer"]
-  L2 --> L7
-  L0 --> L8["Lot 8 · Annuaire"]
-  L7 --> L9["Lot 9 · Durcissement"]
-  L1 -.-> LT["Lot T · Tests"]
+  L5 --> L6["Lot 6 · Proposer<br/>pull request"]
+  L6 --> L7["Lot 7 · Suivre"]
+  L7 --> L8["Lot 8 · Modérer"]
+  L4 --> L8
+  L0 --> L9["Lot 9 · Annuaire"]
+  L8 --> L10["Lot 10 · Suites"]
+  L2 -.-> LT["Lot T · Tests"]
 ```
 
 ## Ordre conseillé
 
-1. **Lot 1 + Lot T ensemble.** Le pack est le socle, et c'est la partie testable.
-2. **Lot 2.** Indépendant, donc bon candidat si l'envie est ailleurs un soir.
-3. **Lot 3, puis 4, puis 5.** À la fin du lot 5, une proposition part réellement : c'est
-   le premier jalon qui se montre.
-4. **Lot 8** quand on veut, il est court et isolé.
-5. **Lot 6, puis 7.** La modération ferme la boucle.
-6. **Lot 9** ensuite, et seulement si quelqu'un s'en sert.
-
-Le premier jalon démontrable est donc **la fin du lot 5**. C'est le moment d'en parler à
-DantSu, avec une vraie proposition ouverte sur un vrai store.
+1. **Lot 1**, puis **lot 2 avec le lot T**. À la fin, un pack fabriqué depuis un
+   formulaire s'installe dans Telmi-Sync. C'est le jalon le plus important du projet :
+   il prouve que la porte d'entrée fonctionne.
+2. **Lot 3** dans sa version silence, puis micro.
+3. **Lot 4**, indépendant.
+4. **Lot 5**, puis **6** : une proposition part réellement. Premier jalon montrable.
+5. **Lot 9** quand on veut, il est court et isolé.
+6. **Lot 7**, puis **8** : la modération ferme la boucle.
+7. **Lot 10** ensuite, et seulement si quelqu'un s'en sert.
 
 ## Prérequis hors code
 
 | Quoi | Pourquoi | Quand |
 | --- | --- | --- |
-| **Créer une OAuth App GitHub** | obtenir le `client_id` du Device Flow. Aucun secret client n'est nécessaire pour ce flux, le `client_id` peut être embarqué dans l'application | avant le lot 2 |
-| **Un second compte GitHub** | tester la boucle complète : proposer depuis un compte, modérer depuis l'autre | avant le lot 7 |
+| **Une conteuse Telmi à portée de main** | seul juge du format audio et du câblage de `nodes.json` | dès le lot 2 |
+| **Créer une OAuth App GitHub** | le `client_id` du Device Flow. Aucun secret client n'est nécessaire pour ce flux | avant le lot 4 |
+| **Un second compte GitHub** | tester la boucle : proposer depuis l'un, modérer depuis l'autre | avant le lot 8 |
 | **Store de test** | déjà fait : [telmi-store-dev](https://github.com/famaridon/telmi-store-dev) | ✅ |
 | **Décider du nom public du store** | `telmi-store-fr` est déjà pris par une organisation vide de DantSu | avant d'ouvrir aux contributions |
 
 ## Décisions ouvertes
 
-**1. Comment écouter un pack en modération ?** *(bloquant pour le lot 7)*
-Installer dans `~/.telmi` est simple mais viole la règle de non-écriture et pollue la
-bibliothèque du modérateur avec des propositions refusées. Un lecteur intégré est plus
-propre et plus agréable, mais c'est un vrai morceau. **Recommandation : lecteur intégré**,
-en commençant par le strict minimum — décompresser dans un dossier temporaire et jouer les
-audios dans l'ordre de `nodes.json`, sans images ni navigation.
+**1. Les titres dits à voix haute** *(lot 3)* — silence, micro ou Piper. Recommandation :
+silence comme filet, micro comme chemin conseillé, Piper plus tard.
 
-**2. Où stocker le jeton ?** *(lot 2)*
-`safeStorage` d'Electron s'appuie sur le trousseau du système et suffit. À confirmer que
-le comportement est acceptable sur Linux, où `safeStorage` peut retomber sur un chiffrement
-faible selon l'environnement de bureau.
+**2. Le passe-plat audio tient-il ?** *(lot 2, à tester tôt)* — recopier les mp3 sans
+ré-encoder évite le gros du travail et du poids. Le format de référence dit que le débit
+n'est pas contraint, mais rien n'est vérifié pour du VBR, du 48 kHz ou du mono. **Si ça ne
+passe pas sur matériel, ffmpeg redevient nécessaire** et le lot 2 change de taille.
 
-**3. Un store ou plusieurs ?** *(lot 8)*
-Un store par langue, comme aujourd'hui, ou un store unique multilingue avec un champ
-`langue` par fiche ? Le champ existe déjà dans la fiche, donc le second est possible sans
-rien changer. Un store unique concentre l'audience et la modération ; plusieurs stores
-répartissent la charge et permettent des mainteneurs par langue.
+**3. Comment écouter en modération ?** *(lot 8)* — lecteur intégré recommandé, plutôt
+qu'une installation dans `~/.telmi`.
 
-**4. Faut-il un mode « store privé » ?** *(après le lot 8)*
-Le serveur HTTP local de Telmi-Sync sert déjà `{banner, data[]}` sur son port : partager
-sa bibliothèque sur un réseau local fonctionne déjà, sans rien de tout ce projet. Vaut-il
-la peine d'en faire une fonction visible, ou est-ce hors sujet ?
+**4. Où stocker le jeton ?** *(lot 4)* — `safeStorage` suffit ; à confirmer sous Linux, où
+il peut retomber sur un chiffrement faible selon l'environnement de bureau.
+
+**5. Un store ou plusieurs ?** *(lot 9)* — un par langue comme aujourd'hui, ou un store
+unique multilingue ? Le champ `langue` existe déjà dans la fiche, donc les deux sont
+possibles sans rien changer.
 
 ## Ce qu'on ne fait pas
 
+- Fabriquer des histoires **interactives**. Trop complexe pour l'instant, et c'est le
+  métier du Studio de Telmi-Sync.
 - Héberger des packs, servir des fichiers, faire tourner un serveur.
-- Fabriquer une histoire de zéro : c'est le métier du Studio de Telmi-Sync.
 - Écrire dans `~/.telmi`, jamais, pour aucune raison.
-- Parler à la conteuse ou à la carte SD.
+- Parler à la conteuse ou à la carte SD : ça reste à Telmi-Sync.
 - Un site web. L'annuaire est un fichier JSON, pas une plateforme.
