@@ -50,8 +50,8 @@ Un seul écran, qui doit être franchissable par un parent ou une institutrice.
 - [ ] Chaque chapitre vient d'un **fichier local** (glisser-déposer ou sélecteur) **ou
       d'une URL**
 - [ ] Réordonner les chapitres, en renommer un, en retirer un
-- [ ] Lire durée, échantillonnage et nombre de canaux de chaque audio, et **prévenir**
-      quand on sort du 44 100 Hz stéréo
+- [ ] Afficher la durée de chaque chapitre et le poids total — la durée vient
+      gratuitement d'un élément `<audio>`, il n'y a rien à décoder
 - [ ] Champs du pack : titre, âge, catégorie, langue, description, **question du menu**
       (« Quelle histoire veux-tu écouter ? »)
 - [ ] Couverture obligatoire : fichier ou URL
@@ -67,6 +67,8 @@ arrive au bout sans jamais ouvrir un terminal ni un éditeur de texte.
   ni CORS ni jeton à exposer.
 - Une URL peut être longue à répondre ou mentir sur son type. Message clair, jamais un
   compteur qui tourne.
+- **On ne valide pas et on ne convertit pas l'audio.** Ce n'est pas notre métier :
+  Telmi-Sync a une commande « optimiser l'audio » pour ça. On recopie le mp3 tel quel.
 - **Le poids total conditionne tout le reste** : au-delà de 2 Gio, aucun asset de release
   ne l'acceptera. À afficher tôt, pas à la fin.
 
@@ -106,10 +108,10 @@ avec les API de Chromium, ce qui évite de télécharger ffmpeg comme le fait Te
 
 | Besoin | Moyen | Dépendance |
 | --- | --- | --- |
-| Décoder, mesurer, valider un audio | Web Audio API | aucune |
 | Générer les images avec du texte | `<canvas>` puis `toBlob('image/png')` | aucune |
-| Créer un mp3 court | `lamejs` | pure JS, ~100 Ko |
+| Créer un mp3 court (titres dits à voix haute) | `lamejs` | pure JS, ~100 Ko |
 | Zipper | `yazl` | pure JS, streaming |
+| Recopier les mp3 des chapitres | `fs`, sans les ouvrir | aucune |
 
 Le renderer génère les images sur un canvas — le contributeur **voit** ce qu'il va
 publier — et envoie les octets au processus principal. Les mp3 des chapitres sont recopiés
@@ -119,8 +121,14 @@ n'est pas contraint.
 **Points d'attention.**
 - `ConvertZip.js` exige *exactement quatre* fichiers marqueurs. Un pack qui en manque un
   est rejeté sans explication : la fabrication doit les garantir.
-- Le passe-plat audio est le pari du lot. S'il échoue sur matériel, il faudra un encodeur —
-  et là, ffmpeg redevient nécessaire. **À tester tôt.**
+- **Pourquoi fabriquer, alors que livrer un dossier brut au `FORMAT_AUDIO_LIST` ferait
+  faire tout le travail à Telmi-Sync ?** Parce que cet import régénère un `uuid` et remet
+  `version` à 0 à chaque fois : l'histoire resterait affichée comme téléchargeable même
+  après installation, et aucune mise à jour ne serait jamais détectable. C'est le mécanisme
+  sur lequel repose tout le modèle de store. Le raisonnement complet est dans
+  [docs/format-pack.md](docs/format-pack.md), section « Quel format livrer ».
+- Un pack livré au format Telmi n'est converti **à aucun moment** : `fs.copyFileSync` à
+  l'import comme au transfert vers la carte. Ce qu'on met dedans arrive tel quel.
 
 ---
 
@@ -348,10 +356,11 @@ flowchart TD
 **1. Les titres dits à voix haute** *(lot 3)* — silence, micro ou Piper. Recommandation :
 silence comme filet, micro comme chemin conseillé, Piper plus tard.
 
-**2. Le passe-plat audio tient-il ?** *(lot 2, à tester tôt)* — recopier les mp3 sans
-ré-encoder évite le gros du travail et du poids. Le format de référence dit que le débit
-n'est pas contraint, mais rien n'est vérifié pour du VBR, du 48 kHz ou du mono. **Si ça ne
-passe pas sur matériel, ffmpeg redevient nécessaire** et le lot 2 change de taille.
+**2. Tranchée : on ne touche pas à l'audio.** Le mp3 du contributeur est recopié tel quel.
+Telmi-Sync ne le convertit ni à l'import d'un pack Telmi ni au transfert vers la carte,
+donc il arrive intact sur la conteuse — et si un fichier posait problème, l'utilisateur a
+la commande « optimiser l'audio ». Reste à vérifier une fois sur matériel, sans en faire
+un préalable.
 
 **3. Comment écouter en modération ?** *(lot 8)* — lecteur intégré recommandé, plutôt
 qu'une installation dans `~/.telmi`.
