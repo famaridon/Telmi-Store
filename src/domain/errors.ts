@@ -33,6 +33,9 @@ export type AppError =
   | { code: 'auth/no-session' }
   | { code: 'token/unwritable'; cause: string }
   | { code: 'token/unreadable'; cause: string }
+  | { code: 'pack/missing-image'; path: string }
+  | { code: 'pack/unknown-source'; path: string }
+  | { code: 'pack/unwritable'; cause: string }
   | { code: 'ui/no-window' }
   | { code: 'ipc/unknown-channel'; channel: string }
   | { code: 'internal/unexpected'; cause: string }

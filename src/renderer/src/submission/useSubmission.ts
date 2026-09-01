@@ -16,6 +16,12 @@ import { useDurations } from './useDurations'
 export interface SubmissionForm {
   submission: Submission
   review: SubmissionReview
+  /**
+   * Identity of the story being prepared, drawn once. It must stay the same
+   * across the versions of one story, otherwise Telmi-Sync sees an unrelated
+   * story instead of an update — persisting it belongs to the follow-up stage.
+   */
+  uuid: string
   setField: <K extends keyof Submission>(field: K, value: Submission[K]) => void
   setRights: (field: keyof Submission['rights'], value: string) => void
   addChapters: (files: PickedFile[]) => void
@@ -30,6 +36,7 @@ let counter = 0
 const nextKey = (): string => `c${++counter}`
 
 export const useSubmission = (): SubmissionForm => {
+  const [uuid] = useState(() => crypto.randomUUID())
   const [submission, setSubmission] = useState<Submission>({
     ...EMPTY_SUBMISSION,
     question: DEFAULT_QUESTION
@@ -73,6 +80,7 @@ export const useSubmission = (): SubmissionForm => {
   return {
     submission,
     review,
+    uuid,
     setField,
     setRights,
     addChapters,

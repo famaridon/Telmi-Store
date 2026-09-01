@@ -8,7 +8,8 @@ import { createElectronFilePicker } from '@infra/electronFilePicker'
 import { registerFileScheme, serveFileScheme } from '@infra/electronFileProtocol'
 import { createGitHubAuth } from '@infra/githubAuth'
 import { createElectronTokenStore } from '@infra/electronTokenStore'
-import { createElectronBrowser } from '@infra/electronBrowser'
+import { createElectronShell } from '@infra/electronShell'
+import { createZipPackWriter } from '@infra/zipPackWriter'
 import { GITHUB_CLIENT_ID } from '@infra/config'
 import { registerIpc, unregisterIpc } from './ipc'
 
@@ -28,7 +29,8 @@ const wire = (): Ports => {
     fetcher: createHttpFetcher(vault),
     auth: createGitHubAuth(GITHUB_CLIENT_ID),
     tokens: createElectronTokenStore(),
-    browser: createElectronBrowser(),
+    shell: createElectronShell(),
+    packs: createZipPackWriter(vault),
     sleep: (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000))
   }
 }

@@ -91,30 +91,36 @@ un podcast, et c'est ce qui a produit les stores existants — mais ça double l
 
 ---
 
-## Lot 2 — Fabriquer le pack
+## Lot 2 — Fabriquer le pack ✅
 
-**Taille : M.** Dépend de : lot 1. C'est le cœur technique.
+**Livré.** Dépend de : lot 1. C'est le cœur technique.
 
 Produire l'arborescence décrite dans [docs/format-pack.md](docs/format-pack.md), à
 l'octet près.
 
-- [ ] Générer `nodes.json` pour N chapitres — le graphe est entièrement mécanique, y
+- [x] Générer `nodes.json` pour N chapitres — le graphe est entièrement mécanique, y
       compris le bouclage du dernier chapitre sur l'index 0
-- [ ] Générer `metadata.json` avec **`version` ≥ 1** et un `uuid` stable, et `notes.json`
-- [ ] Générer les images : `cover.png` 512 × 512, `title.png` et `images/m<n>.png`
+- [x] Générer `metadata.json` avec **`version` ≥ 1** et un `uuid` stable, et `notes.json`
+- [x] Générer les images : `cover.png` 512 × 512, `title.png` et `images/m<n>.png`
       640 × 480, titre incrusté
-- [ ] Recopier les audios des chapitres en `audios/s<n>.mp3`
-- [ ] Zipper, calculer `sha256` et `taille`
+- [x] Recopier les audios des chapitres en `audios/s<n>.mp3`
+- [x] Zipper, calculer `sha256` et `taille`
 
-**Critère d'acceptation.** Le zip produit passe le validateur, jusqu'à l'installation :
+**Critère d'acceptation ✅.** Un pack produit par l'application a été passé au validateur,
+installation comprise :
 
-```sh
-TELMI_SYNC=../Telmi-Sync \
-  node ../telmi-store-dev/outils/valider-store.mjs <url-du-store-local> --installer
+```
+5. FORMAT_TELMI detecte  — dossier « (racine) », les 4 marqueurs presents
+6. histoire installee    — Store Dev_03_Pack de validation lot 2_fffffc-lot2-validation
+   Bilan  10 OK · 0 avertissement · 0 KO
 ```
 
-`FORMAT_TELMI detecte` puis `histoire installee`. Puis, une fois au moins, **écouter le
-pack sur une vraie conteuse** : c'est le seul juge du format audio.
+Le nom du dossier installé conserve notre `uuid` : c'est précisément ce qui fera
+fonctionner la détection de mise à jour.
+
+⏳ **Reste à écouter un pack sur une vraie conteuse** — seul juge du format audio et du
+câblage de `nodes.json`. Le graphe est couvert par les tests, mais un test ne dit pas si
+le bouton HOME tombe où l'enfant l'attend.
 
 **Décision structurante : aucun binaire externe.** Tout est faisable en JavaScript pur et
 avec les API de Chromium, ce qui évite de télécharger ffmpeg comme le fait Telmi-Sync :
@@ -125,6 +131,10 @@ avec les API de Chromium, ce qui évite de télécharger ffmpeg comme le fait Te
 | Créer un mp3 court (titres dits à voix haute) | `lamejs` | pure JS, ~100 Ko |
 | Zipper | `yazl` | pure JS, streaming |
 | Recopier les mp3 des chapitres | `fs`, sans les ouvrir | aucune |
+
+**Tenu :** aucun binaire externe n'est nécessaire pour fabriquer un pack. Le seul octet
+d'audio que l'application produit elle-même est un silence de 1 820 octets, figé dans le
+code, qui tient la place du marqueur `title.mp3` en attendant une voix.
 
 Le renderer génère les images sur un canvas — le contributeur **voit** ce qu'il va
 publier — et envoie les octets au processus principal. Les mp3 des chapitres sont recopiés

@@ -4,6 +4,7 @@ import { causeOf, fail, ok } from '@domain/errors'
 import type { Ports } from '@domain/ports'
 import { admitPaths, fetchFromUrl, listLibrary, pickFiles } from '@app/usecases'
 import { restoreSession, signIn, signOut } from '@app/signIn'
+import { buildPack } from '@app/buildPack'
 import type { Answer, Channel, Params } from '@shared/contract'
 import { CHANNELS } from '@shared/contract'
 
@@ -66,12 +67,29 @@ export const registerIpc = (ports: Ports): void => {
 
   handle('auth:openVerification', async () => {
     if (underWay === null) return fail({ code: 'auth/no-session' })
-    await ports.browser.open(underWay.verificationUri)
+    await ports.shell.openUrl(underWay.verificationUri)
     return ok(undefined)
   })
 
   handle('auth:restore', () => restoreSession(ports))
   handle('auth:signOut', () => signOut(ports))
+
+  // The path of the last pack is kept here rather than handed to the interface
+  // and taken back: revealing a file is the only thing we do with it, and the
+  // interface has no business naming an arbitrary path.
+  let lastPack: string | null = null
+
+  handle('pack:build', async ({ plan, images }) => {
+    const built = await buildPack(ports, plan, images)
+    if (built.ok) lastPack = built.value.path
+    return built
+  })
+
+  handle('pack:reveal', async () => {
+    if (lastPack === null) return fail({ code: 'pack/unwritable', cause: 'aucun pack construit' })
+    await ports.shell.revealFile(lastPack)
+    return ok(undefined)
+  })
 }
 
 /** Removes every handler, so a reload cannot register them twice. */

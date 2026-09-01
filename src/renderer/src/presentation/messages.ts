@@ -119,6 +119,24 @@ export const describeError = (error: AppError): ShownError => {
         message: 'Impossible de relire la connexion enregistrée. Reconnecte-toi.',
         detail: error.cause
       }
+    case 'pack/missing-image':
+      return {
+        message:
+          "Une image du pack n'a pas pu être fabriquée. Réessaie, et si cela se reproduit, " +
+          'change l’image concernée.',
+        detail: error.path
+      }
+    case 'pack/unknown-source':
+      return {
+        message:
+          'Un fichier déposé a été perdu en route. Retire-le et ajoute-le à nouveau.',
+        detail: error.path
+      }
+    case 'pack/unwritable':
+      return {
+        message: "Impossible d'écrire le pack. Vérifie l'espace disque disponible.",
+        detail: error.cause
+      }
     case 'ui/no-window':
       return { message: 'Aucune fenêtre disponible.' }
     case 'ipc/unknown-channel':

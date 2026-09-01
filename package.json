@@ -23,18 +23,22 @@
   },
   "dependencies": {
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "yazl": "3.3.1"
   },
   "devDependencies": {
     "@types/node": "26.4.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
+    "@types/yauzl": "3.4.0",
+    "@types/yazl": "3.3.1",
     "@vitejs/plugin-react": "5.2.0",
     "electron": "44.1.0",
     "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
     "typescript": "7.0.2",
     "vite": "7.3.6",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "yauzl": "3.4.0"
   }
 }

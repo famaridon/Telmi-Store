@@ -366,10 +366,12 @@ src/
 │   ├── model.ts               ✅ LocalStory, PickedFile, Chapter, Submission, StoreEntry
 │   ├── errors.ts              ✅ AppError (union discriminée), Result<T>
 │   ├── ports.ts               ✅ StoryLibrary, FileVault, FilePicker, Fetcher
+│   ├── pack.ts               ✅ la forme d'un pack : stages, actions, marqueurs
 │   └── rules/
 │       ├── submission.ts      ✅ reviewSubmission : ce qui bloque, ce qui avertit
 │       ├── files.ts           ✅ extensions, types MIME, nom d'un téléchargement
-│       └── pack.ts               nodes.json, notes.json, metadata.json (étape 2)
+│       ├── pack.ts            ✅ planPack : tout ce que le pack contiendra
+│       └── imageLayout.ts     ✅ découpe du texte et cadrage, sans canvas
 ├── application/
 │   └── usecases.ts            ✅ listLibrary, pickFiles, admitPaths, fetchFromUrl
 ├── infrastructure/
@@ -378,8 +380,12 @@ src/
 │   ├── httpFetcher.ts         ✅ URL → coffre, avec progression
 │   ├── electronFilePicker.ts  ✅ sélecteur natif
 │   ├── electronFileProtocol.ts ✅ telmi-file://, avec requêtes de plage
-│   ├── github/                   Device Flow, dépôts, releases, pull requests
-│   └── zipPackWriter.ts          fabrication de l'archive (étape 2)
+│   ├── githubAuth.ts         ✅ les trois échanges du Device Flow
+│   ├── electronTokenStore.ts ✅ le jeton, chiffré par le trousseau
+│   ├── electronShell.ts      ✅ navigateur et gestionnaire de fichiers
+│   ├── zipPackWriter.ts      ✅ l'archive, et son empreinte
+│   ├── silentMp3.ts          ✅ le silence qui tient la place de title.mp3
+│   └── github/                   dépôts, releases, pull requests
 ├── shared/
 │   └── contract.ts            ✅ canaux, paramètres, résultats, événements
 ├── main/
@@ -400,7 +406,7 @@ src/
     │   ├── useDurations.ts    ✅ durée via un <audio>, rien à décoder
     │   ├── ChapterRow.tsx     ✅
     │   └── UrlField.tsx       ✅
-    ├── build/                    fabrication du pack (étape 2)
+    ├── build/             ✅ dessin sur canvas et suivi de la fabrication
     ├── submit/                   dépôt GitHub, release, pull request, suivi
     └── moderate/                 propositions ouvertes, écouter, accepter, refuser
 ```

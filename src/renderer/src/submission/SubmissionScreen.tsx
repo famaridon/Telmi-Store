@@ -4,6 +4,7 @@ import { RIGHTS_STATUSES } from '@domain/rules/submission'
 import { describeBlocker, describeWarning, RIGHTS_TEXT } from '../presentation/messages'
 import { formatBytes, formatDuration } from '../presentation/format'
 import ErrorBanner from '../presentation/ErrorBanner'
+import BuildPanel from '../build/BuildPanel'
 import { useSubmission } from './useSubmission'
 import UrlField from './UrlField'
 import ChapterRow from './ChapterRow'
@@ -255,15 +256,7 @@ function SubmissionScreen(): React.JSX.Element {
           </div>
         )}
 
-        <button type="button" className="primary" disabled={!review.ready}>
-          Fabriquer le pack
-        </button>
-        {review.ready && (
-          <p className="hint">
-            La fabrication est l’étape suivante : ce bouton sera branché sur la génération du
-            pack Telmi.
-          </p>
-        )}
+        <BuildPanel submission={submission} uuid={form.uuid} ready={review.ready} />
       </section>
     </div>
   )

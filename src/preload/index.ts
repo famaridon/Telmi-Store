@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { fail } from '@domain/errors'
 import type { FileKind } from '@domain/model'
+import type { PackPlan } from '@domain/pack'
+import type { DrawnImage } from '@domain/ports'
 import type { Answer, Channel, EventChannel, Events, Params } from '@shared/contract'
 import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/contract'
 
@@ -42,6 +44,12 @@ const api = {
     signOut: () => invoke('auth:signOut'),
     /** Opens the GitHub page of the sign-in under way. Takes no URL. */
     openVerification: () => invoke('auth:openVerification')
+  },
+
+  packs: {
+    build: (plan: PackPlan, images: DrawnImage[]) => invoke('pack:build', { plan, images }),
+    /** Shows the last pack built in the file manager. */
+    reveal: () => invoke('pack:reveal')
   },
 
   /** Subscribes to an event pushed by the main process. Returns an unsubscribe. */

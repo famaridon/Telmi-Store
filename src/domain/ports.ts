@@ -1,6 +1,7 @@
 import type { DeviceCode, Identity, PollOutcome } from './auth'
 import type { AppError, Result } from './errors'
 import type { FileKind, LocalStory, PickedFile } from './model'
+import type { BuiltPack, PackPlan } from './pack'
 
 /**
  * What the application needs from the outside world, expressed as interfaces it
@@ -61,9 +62,27 @@ export interface TokenStore {
 /** Lets the application wait without knowing about timers, so tests run fast. */
 export type Sleep = (seconds: number) => Promise<void>
 
-/** Opens a URL in the contributor's browser. */
-export interface Browser {
-  open(url: string): Promise<void>
+/** The desktop around the application: the browser, the file manager. */
+export interface Shell {
+  openUrl(url: string): Promise<void>
+  /** Shows a file in the system's file manager. */
+  revealFile(path: string): Promise<void>
+}
+
+/** Images the interface has drawn, ready to be written into the pack. */
+export interface DrawnImage {
+  path: string
+  bytes: Uint8Array
+}
+
+/**
+ * Writes a pack from its plan.
+ *
+ * The images arrive already drawn, because only the interface has a canvas; the
+ * audio never crosses the boundary, only the ids that resolve to paths.
+ */
+export interface PackWriter {
+  write(plan: PackPlan, images: DrawnImage[]): Promise<Result<BuiltPack>>
 }
 
 /** Everything the use cases need, gathered so the composition root wires it once. */
@@ -74,7 +93,8 @@ export interface Ports {
   fetcher: Fetcher
   auth: GitHubAuth
   tokens: TokenStore
-  browser: Browser
+  shell: Shell
+  packs: PackWriter
   sleep: Sleep
 }
 
