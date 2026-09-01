@@ -1,4 +1,5 @@
 import type { Submission } from '@domain/model'
+import type { Voices } from '../voice/useVoices'
 import ErrorBanner from '../presentation/ErrorBanner'
 import { formatBytes } from '../presentation/format'
 import { useBuildPack } from './useBuildPack'
@@ -8,10 +9,11 @@ interface Props {
   /** Stable identity of the story, kept across versions. */
   uuid: string
   ready: boolean
+  voices: Voices
 }
 
 /** The last step of the screen: turning the form into a pack. */
-function BuildPanel({ submission, uuid, ready }: Props): React.JSX.Element {
+function BuildPanel({ submission, uuid, ready, voices }: Props): React.JSX.Element {
   const build = useBuildPack()
   const { state } = build
 
@@ -21,13 +23,19 @@ function BuildPanel({ submission, uuid, ready }: Props): React.JSX.Element {
 
       {state.step === 'idle' && (
         <>
-          <button type="button" className="primary big" disabled={!ready} onClick={() => build.build(submission, uuid)}>
+          <button
+            type="button"
+            className="primary big"
+            disabled={!ready}
+            onClick={() => build.build(submission, uuid, voices.files(), voices.complete)}
+          >
             Fabriquer le pack
           </button>
           {ready && (
             <p className="hint">
-              Les titres seront <strong>incrustés dans les images</strong>. La conteuse ne les dira
-              pas encore à voix haute : c’est l’étape suivante.
+              {voices.complete
+                ? 'Les titres seront dits à voix haute, avec ta voix, et lisibles sur les images.'
+                : 'Les titres seront incrustés dans les images. La conteuse ne les annoncera pas — enregistre-les à l’étape précédente si tu veux qu’elle le fasse.'}
             </p>
           )}
         </>

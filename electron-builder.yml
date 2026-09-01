@@ -9,3 +9,9 @@ mac:
   category: public.app-category.education
   identity: null
   target: [dmg]
+  extendInfo:
+    # Exigé par macOS dès qu'une application demande le micro : le contributeur
+    # enregistre les titres que la conteuse dira à voix haute.
+    NSMicrophoneUsageDescription: >-
+      Telmi Store utilise le micro pour enregistrer les titres que la conteuse
+      dira à voix haute.

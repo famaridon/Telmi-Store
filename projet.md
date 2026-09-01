@@ -155,9 +155,9 @@ n'est pas contraint.
 
 ---
 
-## Lot 3 — Les titres dits à voix haute
+## Lot 3 — Les titres dits à voix haute ✅
 
-**Taille : M.** Dépend de : lot 2. **Peut être livré après un premier jet muet.**
+**Livré : le silence comme filet, le micro comme chemin conseillé.** Piper reste au lot 10.
 
 Le format prévoit `title.mp3`, `q.mp3` et un `m<n>.mp3` par chapitre : le titre du pack,
 la question, et le titre de chaque chapitre, dits à voix haute. C'est ce qui rend la
@@ -172,13 +172,24 @@ Trois voies, à trancher :
 | **Micro** — le contributeur dit les titres dans l'application | faible : `MediaRecorder` + `lamejs`, aucun binaire | la voix d'un parent. Plus chaleureux que n'importe quelle synthèse |
 | **Piper** — la même synthèse que Telmi-Sync | fort : télécharger binaire et voix (~50 à 80 Mo) | homogène avec les packs officiels, automatisable |
 
-**Recommandation : le silence comme filet, le micro comme chemin conseillé.** Les deux ne
-demandent aucun binaire, donc les deux tiennent dans ce lot. Dire cinq titres au micro
-prend deux minutes, et le résultat est meilleur qu'une synthèse. Piper devient utile le
-jour où quelqu'un publie trente chapitres d'un coup — au lot 10.
+**Retenu : le silence comme filet, le micro comme chemin conseillé.** Aucun binaire dans
+les deux cas. Dire quatre titres au micro prend deux minutes, et une voix de parent vaut
+mieux qu'une synthèse pour un enfant de trois ans.
 
-**Critère d'acceptation.** Un pack fabriqué avec titres enregistrés s'installe, et les
-titres s'entendent au bon moment sur la conteuse.
+- [x] Enregistrement au micro, une étiquette à la fois, avec minuterie et arrêt à 15 s
+- [x] Réécoute et reprise de chaque enregistrement
+- [x] Conversion WebM/Opus → mp3 en JavaScript pur, sans binaire
+- [x] Repli sur le silence pour toute étiquette non enregistrée
+- [x] Permission micro accordée côté Electron, et `NSMicrophoneUsageDescription` pour macOS
+
+**Règle retenue : tout ou rien pour le menu.** Un menu qui parle une fois sur deux est pire
+qu'un menu muet — l'enfant entend une voix, puis rien, et ne peut pas comprendre pourquoi.
+La conteuse n'annonce donc les titres que si **tous** sont enregistrés. `title.mp3` fait
+exception : c'est un marqueur, il est utilisé dès qu'il existe.
+
+⏳ **Critère d'acceptation restant** : entendre les titres au bon moment sur une vraie
+conteuse. Le format produit a été vérifié contre ffmpeg — 44 100 Hz stéréo 128 kb/s, le
+format de référence exactement — mais seul le matériel dira si l'annonce tombe juste.
 
 ---
 

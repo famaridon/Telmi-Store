@@ -69,8 +69,13 @@ export interface Shell {
   revealFile(path: string): Promise<void>
 }
 
-/** Images the interface has drawn, ready to be written into the pack. */
-export interface DrawnImage {
+/**
+ * A file the interface produced: an image it drew, a label it recorded.
+ *
+ * These are the only bytes that ever cross the boundary, and they are small.
+ * Chapter audio never does — only the ids that resolve to paths.
+ */
+export interface PackFile {
   path: string
   bytes: Uint8Array
 }
@@ -78,11 +83,11 @@ export interface DrawnImage {
 /**
  * Writes a pack from its plan.
  *
- * The images arrive already drawn, because only the interface has a canvas; the
- * audio never crosses the boundary, only the ids that resolve to paths.
+ * Only the interface has a canvas and a microphone, so it hands over what it
+ * produced; the writer checks that every file the plan names is there.
  */
 export interface PackWriter {
-  write(plan: PackPlan, images: DrawnImage[]): Promise<Result<BuiltPack>>
+  write(plan: PackPlan, files: PackFile[]): Promise<Result<BuiltPack>>
 }
 
 /** Everything the use cases need, gathered so the composition root wires it once. */

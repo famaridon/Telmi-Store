@@ -164,6 +164,44 @@ describe('zipPackWriter — the archive Telmi-Sync will read', () => {
   })
 })
 
+describe('zipPackWriter — voices, or silence in their place', () => {
+  const withVoices = async (spokenTitles: boolean, voices: Record<string, Buffer>) => {
+    const plan = planPack(submission(), { uuid: 'fffffc-test', version: 1, spokenTitles })
+    const files = [
+      ...plan.images.map((image) => ({ path: image.path, bytes: new Uint8Array(PIXEL) })),
+      ...Object.entries(voices).map(([path, bytes]) => ({ path, bytes: new Uint8Array(bytes) }))
+    ]
+    const written = await createZipPackWriter(vault(PATHS)).write(plan, files)
+    expect(written.ok).toBe(true)
+    if (!written.ok) throw new Error('build failed')
+    return readZip(written.value.path)
+  }
+
+  it('uses the recorded label when there is one', async () => {
+    const voice = Buffer.alloc(4096, 42)
+    const entries = await withVoices(true, { 'title.mp3': voice, 'audios/q.mp3': voice, 'audios/m0.mp3': voice, 'audios/m1.mp3': voice })
+    expect(entries.get('title.mp3')).toEqual(voice)
+    expect(entries.get('audios/m1.mp3')).toEqual(voice)
+  })
+
+  it('puts silence where a label was not recorded, rather than omitting the file', async () => {
+    const voice = Buffer.alloc(4096, 42)
+    const entries = await withVoices(true, { 'title.mp3': voice })
+    // The file exists — the storyteller expects it — but it says nothing.
+    expect(entries.get('title.mp3')).toEqual(voice)
+    expect(entries.has('audios/m0.mp3')).toBe(true)
+    expect(entries.get('audios/m0.mp3')).not.toEqual(voice)
+    expect(entries.get('audios/m0.mp3')!.length).toBeGreaterThan(500)
+  })
+
+  it('writes no menu label at all when the titles are not spoken', async () => {
+    const entries = await withVoices(false, {})
+    expect(entries.has('audios/m0.mp3')).toBe(false)
+    expect(entries.has('audios/q.mp3')).toBe(false)
+    expect(entries.has('title.mp3')).toBe(true)
+  })
+})
+
 describe('zipPackWriter — refusing rather than producing a broken pack', () => {
   it('names the image that was not drawn', async () => {
     const plan = planPack(submission(), { uuid: 'fffffc-test', version: 1 })

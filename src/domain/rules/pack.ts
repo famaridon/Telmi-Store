@@ -104,6 +104,27 @@ export const slugify = (text: string): string =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 60) || 'histoire'
 
+/**
+ * The labels the storyteller says out loud: the pack title, the menu question,
+ * and each chapter title.
+ *
+ * `title.mp3` is in the list whatever happens — it is one of the four markers,
+ * so the file exists in every pack, spoken or silent. The others only appear
+ * when the labels are meant to be spoken at all.
+ */
+export const spokenLabels = (submission: Submission, spokenTitles: boolean): AudioToSpeak[] => {
+  const labels: AudioToSpeak[] = [{ path: 'title.mp3', text: submission.title }]
+  if (!spokenTitles) return labels
+
+  if (submission.question.trim() !== '') {
+    labels.push({ path: 'audios/q.mp3', text: submission.question })
+  }
+  submission.chapters.forEach((chapter, index) => {
+    labels.push({ path: `audios/${menuStage(index)}.mp3`, text: chapter.title })
+  })
+  return labels
+}
+
 export interface PackIdentity {
   /** Must stay the same across versions, or no update is ever detected. */
   uuid: string
@@ -129,16 +150,7 @@ export const planPack = (submission: Submission, identity: PackIdentity): PackPl
   const total = submission.chapters.length
   const spokenTitles = identity.spokenTitles ?? false
 
-  // title.mp3 is a marker: it exists in every pack, spoken or silent.
-  const spoken: AudioToSpeak[] = [{ path: 'title.mp3', text: submission.title }]
-  if (spokenTitles) {
-    if (submission.question.trim() !== '') {
-      spoken.push({ path: 'audios/q.mp3', text: submission.question })
-    }
-    submission.chapters.forEach((chapter, index) => {
-      spoken.push({ path: `audios/${menuStage(index)}.mp3`, text: chapter.title })
-    })
-  }
+  const spoken = spokenLabels(submission, spokenTitles)
 
   // The cover is required by the form, so it is present by the time we get here.
   const coverId = submission.cover?.id ?? ''

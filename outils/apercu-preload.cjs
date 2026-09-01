@@ -19,15 +19,41 @@ let poserCode = null
 contextBridge.exposeInMainWorld('telmi', {
   library: { list: async () => ({ ok: true, value: [] }) },
   files: {
-    pickAudios: async () => ({ ok: true, value: [] }),
-    pickImage: async () => ({ ok: true, value: [] }),
+    // En etat « rempli », le selecteur rend de quoi peupler l'ecran.
+    pickAudios: async () => ({
+      ok: true,
+      value:
+        ETAT === 'rempli'
+          ? [
+              { id: 'a1', name: '01 - Ava et la couronne du pouvoir.mp3', bytes: 13_600_000, from: 'disk' },
+              { id: 'a2', name: '02 - Gouzabas.mp3', bytes: 5_900_000, from: 'disk' }
+            ]
+          : []
+    }),
+    pickImage: async () => ({
+      ok: true,
+      value: ETAT === 'rempli' ? [{ id: 'cover', name: 'couverture.jpg', bytes: 504_000, from: 'disk' }] : []
+    }),
     admit: async () => ({ ok: true, value: [] }),
     fetch: async () => ({ ok: false, error: { code: 'url/invalid', url: '' } }),
     pathOf: () => ''
   },
+
+  packs: {
+    build: async () => ({
+      ok: true,
+      value: {
+        path: '/tmp/les-contes-de-la-mere-pauline.zip',
+        sha256: '46ac1cd04418e255e60a266189b3529c150ea18c0f0f8009911b21d777962017',
+        bytes: 24_318_442,
+        fileCount: 10
+      }
+    }),
+    reveal: async () => ({ ok: true, value: undefined })
+  },
   auth: {
     restore: async () =>
-      ETAT === 'signedIn'
+      ETAT === 'signedIn' || ETAT === 'rempli'
         ? { ok: true, value: { identity: { login: 'famaridon', name: 'Florent' }, scopes: ['public_repo'] } }
         : { ok: true, value: null },
     signIn: async () => new Promise(() => {}),

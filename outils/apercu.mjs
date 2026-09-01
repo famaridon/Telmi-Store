@@ -4,7 +4,7 @@ import { mkdirSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 
-const ETATS = ['anonymous', 'waiting', 'signedIn']
+const ETATS = ['anonymous', 'waiting', 'signedIn', 'rempli']
 const SORTIE = join(process.cwd(), 'outils', 'apercu')
 mkdirSync(SORTIE, { recursive: true })
 

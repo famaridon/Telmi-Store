@@ -1,20 +1,21 @@
 {
   "compilerOptions": {
-    "composite": true,
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": [
-      "ES2023"
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
     ],
     "types": [
       "node"
     ],
+    "jsx": "react-jsx",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noEmit": true,
@@ -30,17 +31,14 @@
       ],
       "@shared/*": [
         "./src/shared/*"
+      ],
+      "@renderer/*": [
+        "./src/renderer/src/*"
       ]
     }
   },
   "include": [
-    "electron.vite.config.ts",
-    "vitest.config.ts",
-    "src/domain/**/*",
-    "src/application/**/*",
-    "src/infrastructure/**/*",
-    "src/shared/**/*",
-    "src/main/**/*",
-    "src/preload/**/*"
+    "tests/**/*",
+    "src/preload/index.d.ts"
   ]
 }

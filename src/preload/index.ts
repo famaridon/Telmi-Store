@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { fail } from '@domain/errors'
 import type { FileKind } from '@domain/model'
 import type { PackPlan } from '@domain/pack'
-import type { DrawnImage } from '@domain/ports'
+import type { PackFile } from '@domain/ports'
 import type { Answer, Channel, EventChannel, Events, Params } from '@shared/contract'
 import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/contract'
 
@@ -47,7 +47,7 @@ const api = {
   },
 
   packs: {
-    build: (plan: PackPlan, images: DrawnImage[]) => invoke('pack:build', { plan, images }),
+    build: (plan: PackPlan, files: PackFile[]) => invoke('pack:build', { plan, files }),
     /** Shows the last pack built in the file manager. */
     reveal: () => invoke('pack:reveal')
   },

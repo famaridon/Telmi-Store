@@ -407,6 +407,7 @@ src/
     │   ├── ChapterRow.tsx     ✅
     │   └── UrlField.tsx       ✅
     ├── build/             ✅ dessin sur canvas et suivi de la fabrication
+    ├── voice/             ✅ enregistrement au micro et encodage mp3 pur JS
     ├── submit/                   dépôt GitHub, release, pull request, suivi
     └── moderate/                 propositions ouvertes, écouter, accepter, refuser
 ```

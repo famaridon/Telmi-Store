@@ -79,8 +79,8 @@ export const registerIpc = (ports: Ports): void => {
   // interface has no business naming an arbitrary path.
   let lastPack: string | null = null
 
-  handle('pack:build', async ({ plan, images }) => {
-    const built = await buildPack(ports, plan, images)
+  handle('pack:build', async ({ plan, files }) => {
+    const built = await buildPack(ports, plan, files)
     if (built.ok) lastPack = built.value.path
     return built
   })

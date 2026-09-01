@@ -13,15 +13,17 @@
     "dev": "electron-vite dev",
     "preview": "electron-vite preview",
     "build": "npm run typecheck && electron-vite build",
-    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web && npm run typecheck:test",
     "typecheck:node": "tsc -p tsconfig.node.json --noEmit --pretty false",
     "typecheck:web": "tsc -p tsconfig.web.json --noEmit --pretty false",
     "dist:mac": "npm run build && electron-builder --mac",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "apercu": "npm run build && node outils/apercu.mjs"
+    "apercu": "npm run build && node outils/apercu.mjs",
+    "typecheck:test": "tsc -p tsconfig.test.json --noEmit --pretty false"
   },
   "dependencies": {
+    "@breezystack/lamejs": "1.2.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "yazl": "3.3.1"

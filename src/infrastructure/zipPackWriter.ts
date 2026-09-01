@@ -6,7 +6,7 @@ import { pipeline } from 'node:stream/promises'
 import { ZipFile } from 'yazl'
 import { causeOf, fail, ok, type Result } from '@domain/errors'
 import type { BuiltPack, PackPlan } from '@domain/pack'
-import type { DrawnImage, FileVault, PackWriter } from '@domain/ports'
+import type { FileVault, PackFile, PackWriter } from '@domain/ports'
 import { silentMp3 } from './silentMp3'
 
 /**
@@ -22,13 +22,13 @@ import { silentMp3 } from './silentMp3'
  * that if a file ever needs it.
  */
 export const createZipPackWriter = (vault: FileVault): PackWriter => ({
-  async write(plan: PackPlan, images: DrawnImage[]): Promise<Result<BuiltPack>> {
-    const drawn = new Map(images.map((image) => [image.path, image.bytes]))
+  async write(plan: PackPlan, files: PackFile[]): Promise<Result<BuiltPack>> {
+    const produced = new Map(files.map((file) => [file.path, file.bytes]))
 
     // Refuse early and by name: a missing marker would otherwise become an
     // archive silently rejected at import.
     for (const image of plan.images) {
-      if (!drawn.has(image.path)) return fail({ code: 'pack/missing-image', path: image.path })
+      if (!produced.has(image.path)) return fail({ code: 'pack/missing-image', path: image.path })
     }
 
     const sources = new Map<string, string>()
@@ -54,9 +54,14 @@ export const createZipPackWriter = (vault: FileVault): PackWriter => ({
     addBuffer('nodes.json', Buffer.from(JSON.stringify(plan.nodes, null, 1), 'utf8'))
     addBuffer('notes.json', Buffer.from(JSON.stringify(plan.notes, null, 1), 'utf8'))
 
-    for (const image of plan.images) addBuffer(image.path, Buffer.from(drawn.get(image.path)!))
-    // Silence for now; a recorded or synthesised voice replaces it later.
-    for (const spoken of plan.spoken) addBuffer(spoken.path, silentMp3())
+    for (const image of plan.images) addBuffer(image.path, Buffer.from(produced.get(image.path)!))
+
+    // A label the contributor recorded, or silence: the file exists either way,
+    // because title.mp3 is a marker and the storyteller expects the others.
+    for (const spoken of plan.spoken) {
+      const recorded = produced.get(spoken.path)
+      addBuffer(spoken.path, recorded === undefined ? silentMp3() : Buffer.from(recorded))
+    }
 
     for (const [path, source] of sources) {
       zip.addFile(source, path)

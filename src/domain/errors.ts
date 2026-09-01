@@ -36,6 +36,9 @@ export type AppError =
   | { code: 'pack/missing-image'; path: string }
   | { code: 'pack/unknown-source'; path: string }
   | { code: 'pack/unwritable'; cause: string }
+  | { code: 'voice/no-microphone'; cause: string }
+  | { code: 'voice/denied' }
+  | { code: 'voice/encoding-failed'; cause: string }
   | { code: 'ui/no-window' }
   | { code: 'ipc/unknown-channel'; channel: string }
   | { code: 'internal/unexpected'; cause: string }

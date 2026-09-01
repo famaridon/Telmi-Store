@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, session, shell } from 'electron'
 import { join } from 'node:path'
 import type { Ports } from '@domain/ports'
 import { createFsStoryLibrary } from '@infra/fsStoryLibrary'
@@ -83,9 +83,21 @@ const createWindow = (): void => {
 
 const ports = wire()
 
+/**
+ * Electron refuses media access unless something answers for it. We grant the
+ * microphone — the contributor records the menu labels — and nothing else:
+ * without this, `getUserMedia` fails with no explanation.
+ */
+const answerPermissions = (): void => {
+  session.defaultSession.setPermissionRequestHandler((_contents, permission, callback) => {
+    callback(permission === 'media')
+  })
+}
+
 app.whenReady().then(async () => {
   // Downloads do not outlive a session.
   await ports.vault.clear()
+  answerPermissions()
 
   serveFileScheme(ports.vault)
   unregisterIpc()

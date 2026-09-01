@@ -5,6 +5,8 @@ import { describeBlocker, describeWarning, RIGHTS_TEXT } from '../presentation/m
 import { formatBytes, formatDuration } from '../presentation/format'
 import ErrorBanner from '../presentation/ErrorBanner'
 import BuildPanel from '../build/BuildPanel'
+import VoicePanel from '../voice/VoicePanel'
+import { useVoices } from '../voice/useVoices'
 import { useSubmission } from './useSubmission'
 import UrlField from './UrlField'
 import ChapterRow from './ChapterRow'
@@ -16,6 +18,7 @@ import ChapterRow from './ChapterRow'
 function SubmissionScreen(): React.JSX.Element {
   const form = useSubmission()
   const { submission, review } = form
+  const voices = useVoices(submission)
   const [dragging, setDragging] = useState(false)
 
   const dropFiles = useCallback(
@@ -224,6 +227,9 @@ function SubmissionScreen(): React.JSX.Element {
         </div>
       </section>
 
+      {/* -------------------------------------------------------------- voice */}
+      {submission.chapters.length > 0 && <VoicePanel voices={voices} />}
+
       {/* ------------------------------------------------------------ summary */}
       <section className="summary">
         <h2>Récapitulatif</h2>
@@ -256,7 +262,7 @@ function SubmissionScreen(): React.JSX.Element {
           </div>
         )}
 
-        <BuildPanel submission={submission} uuid={form.uuid} ready={review.ready} />
+        <BuildPanel submission={submission} uuid={form.uuid} ready={review.ready} voices={voices} />
       </section>
     </div>
   )

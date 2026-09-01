@@ -2,7 +2,7 @@ import type { DeviceCode, Session } from '@domain/auth'
 import type { Result } from '@domain/errors'
 import type { FileKind, LocalStory, PickedFile } from '@domain/model'
 import type { BuiltPack, PackPlan } from '@domain/pack'
-import type { DrawnImage } from '@domain/ports'
+import type { PackFile } from '@domain/ports'
 
 /**
  * The transport contract: the only surface through which the interface reaches
@@ -40,7 +40,7 @@ export interface Requests {
    * Writes the pack. The images arrive already drawn, because only the interface
    * has a canvas; the audio never crosses, only the ids that resolve to paths.
    */
-  'pack:build': { params: { plan: PackPlan; images: DrawnImage[] }; result: BuiltPack }
+  'pack:build': { params: { plan: PackPlan; files: PackFile[] }; result: BuiltPack }
   /** Shows the last pack built in the file manager. Takes no path, on purpose. */
   'pack:reveal': { params: void; result: void }
 }

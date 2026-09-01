@@ -137,6 +137,24 @@ export const describeError = (error: AppError): ShownError => {
         message: "Impossible d'écrire le pack. Vérifie l'espace disque disponible.",
         detail: error.cause
       }
+    case 'voice/no-microphone':
+      return {
+        message:
+          "Aucun micro n'a été trouvé. Branche-en un, ou passe cette étape : les titres seront " +
+          'lus sur les images au lieu d’être dits.',
+        detail: error.cause
+      }
+    case 'voice/denied':
+      return {
+        message:
+          "L'accès au micro a été refusé. Autorise Telmi Store dans les réglages de ton système, " +
+          'ou passe cette étape.'
+      }
+    case 'voice/encoding-failed':
+      return {
+        message: "L'enregistrement n'a pas pu être converti. Réessaie.",
+        detail: error.cause
+      }
     case 'ui/no-window':
       return { message: 'Aucune fenêtre disponible.' }
     case 'ipc/unknown-channel':

@@ -1,6 +1,6 @@
 import type { Result } from '@domain/errors'
 import type { BuiltPack, PackPlan } from '@domain/pack'
-import type { DrawnImage, Ports } from '@domain/ports'
+import type { PackFile, Ports } from '@domain/ports'
 
 /**
  * Writing the pack.
@@ -13,5 +13,5 @@ import type { DrawnImage, Ports } from '@domain/ports'
 export const buildPack = (
   ports: Ports,
   plan: PackPlan,
-  images: DrawnImage[]
-): Promise<Result<BuiltPack>> => ports.packs.write(plan, images)
+  files: PackFile[]
+): Promise<Result<BuiltPack>> => ports.packs.write(plan, files)

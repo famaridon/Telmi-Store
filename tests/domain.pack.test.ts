@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Chapter, PickedFile, Submission } from '@domain/model'
 import { MARKERS } from '@domain/pack'
 import { EMPTY_SUBMISSION } from '@domain/rules/submission'
-import { buildNodes, buildNotes, packUuid, planPack, slugify } from '@domain/rules/pack'
+import { buildNodes, buildNotes, packUuid, planPack, slugify, spokenLabels } from '@domain/rules/pack'
 
 const file = (name: string, bytes = 1024): PickedFile => ({ id: `id-${name}`, name, bytes, from: 'disk' })
 
@@ -194,6 +194,37 @@ describe('planPack — every file the pack will contain', () => {
     expect(plan.notes['m0']).toEqual({ title: 'm0', notes: 'Le Loup' })
     expect(plan.notes['s0']).toEqual({ title: 'Le Loup', notes: '' })
     expect(plan.notes['q']?.notes).toBe('Quelle histoire veux-tu écouter ?')
+  })
+})
+
+describe('spokenLabels — what the storyteller says out loud', () => {
+  it('always asks for the pack title, since title.mp3 is a marker', () => {
+    expect(spokenLabels(submission(['Un']), false)).toEqual([
+      { path: 'title.mp3', text: 'Contes du soir' }
+    ])
+  })
+
+  it('adds the question and one label per chapter, in the order they are said', () => {
+    expect(spokenLabels(submission(['Un', 'Deux']), true)).toEqual([
+      { path: 'title.mp3', text: 'Contes du soir' },
+      { path: 'audios/q.mp3', text: 'Quelle histoire veux-tu écouter ?' },
+      { path: 'audios/m0.mp3', text: 'Un' },
+      { path: 'audios/m1.mp3', text: 'Deux' }
+    ])
+  })
+
+  it('skips a question the contributor left empty', () => {
+    expect(spokenLabels(submission(['Un'], { question: '   ' }), true).map((l) => l.path)).toEqual([
+      'title.mp3',
+      'audios/m0.mp3'
+    ])
+  })
+
+  it('agrees with what planPack asks for', () => {
+    const story = submission(['Un', 'Deux'])
+    expect(planPack(story, { ...identity, spokenTitles: true }).spoken).toEqual(
+      spokenLabels(story, true)
+    )
   })
 })
 
