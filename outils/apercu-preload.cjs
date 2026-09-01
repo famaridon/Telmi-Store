@@ -39,6 +39,57 @@ contextBridge.exposeInMainWorld('telmi', {
     pathOf: () => ''
   },
 
+  moderate: {
+    allowed: async () => ({ ok: true, value: true }),
+    awaiting: async () => ({
+      ok: true,
+      value: [
+        {
+          number: 15, url: '#', title: 'Comptines du matin (3+)', author: 'une-institutrice',
+          at: '2026-08-28T09:00:00Z',
+          changed: ['histoires/comptines-du-matin.json', 'vignettes/comptines-du-matin.png'],
+          comments: [],
+          entry: {
+            slug: 'comptines-du-matin', title: 'Comptines du matin', minAge: 3,
+            category: 'Comptines', language: 'fr',
+            description: 'Douze comptines pour le reveil, enregistrees dans ma classe de petite section.',
+            uuid: 'fffffc-1', version: 1,
+            rights: { status: 'own-work', source: 'enregistre par moi-meme dans ma classe', declaredBy: '@une-institutrice' },
+            pack: { kind: 'release', repo: 'une-institutrice/comptines-du-matin', tag: 'comptines-du-matin-1.0.0', file: 'comptines-du-matin.zip', sha256: 'b'.repeat(64), bytes: 41_200_000 }
+          }
+        },
+        {
+          number: 16, url: '#', title: 'Contes russes (6+)', author: 'un-passant',
+          at: '2026-08-31T15:00:00Z',
+          changed: ['histoires/contes-russes.json', 'vignettes/contes-russes.png', '.github/workflows/valider.yml'],
+          comments: [{ author: 'dantsu', body: 'Peux-tu preciser la licence ?', at: '2026-09-01T08:00:00Z' }],
+          entry: {
+            slug: 'contes-russes', title: 'Contes russes', minAge: 6,
+            category: 'Contes', language: 'fr',
+            description: 'Trouves sur internet.',
+            uuid: 'fffffc-2', version: 1,
+            rights: { status: 'public-domain', source: '', declaredBy: '@un-passant' },
+            pack: { kind: 'release', repo: 'un-passant/contes-russes', tag: 'contes-russes-1.0.0', file: 'contes-russes.zip', sha256: 'c'.repeat(64), bytes: 210_000_000 }
+          }
+        }
+      ]
+    }),
+    listen: async () => ({
+      ok: true,
+      value: {
+        title: 'Comptines du matin', question: 'Quelle comptine veux-tu ecouter ?',
+        checksumMatches: true,
+        chapters: [
+          { title: 'Une souris verte', audioId: 'x1' },
+          { title: 'Ainsi font font font', audioId: 'x2' },
+          { title: 'Dans la foret lointaine', audioId: 'x3' }
+        ]
+      }
+    }),
+    accept: async () => ({ ok: true, value: undefined }),
+    decline: async () => ({ ok: true, value: undefined })
+  },
+
   packs: {
     build: async () => ({
       ok: true,

@@ -9,6 +9,8 @@ import { registerFileScheme, serveFileScheme } from '@infra/electronFileProtocol
 import { createGitHubAuth } from '@infra/githubAuth'
 import { createGitHubRepos } from '@infra/githubRepos'
 import { createGitHubPulls } from '@infra/githubPulls'
+import { createGitHubModeration } from '@infra/githubModeration'
+import { createZipPackReader } from '@infra/zipPackReader'
 import { createElectronTokenStore } from '@infra/electronTokenStore'
 import { createElectronShell } from '@infra/electronShell'
 import { createZipPackWriter } from '@infra/zipPackWriter'
@@ -32,6 +34,8 @@ const wire = (): Ports => {
     auth: createGitHubAuth(GITHUB_CLIENT_ID),
     repos: createGitHubRepos(),
     pulls: createGitHubPulls(),
+    moderation: createGitHubModeration(),
+    packReader: createZipPackReader(vault),
     tokens: createElectronTokenStore(),
     shell: createElectronShell(),
     packs: createZipPackWriter(vault),

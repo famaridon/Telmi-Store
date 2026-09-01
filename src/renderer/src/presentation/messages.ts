@@ -199,6 +199,29 @@ export const describeError = (error: AppError): ShownError => {
           "Ce store est introuvable. Il a peut-être été renommé, ou rendu privé.",
         detail: error.repo
       }
+    case 'moderation/not-allowed':
+      return {
+        message:
+          "Tu n'as pas les droits pour répondre aux propositions de ce store. Demande-les à la " +
+          'personne qui le maintient.',
+        detail: error.repo
+      }
+    case 'pack/checksum-mismatch':
+      return {
+        message:
+          "Le pack téléchargé ne correspond pas à l'empreinte annoncée dans la fiche : il a été " +
+          'remplacé depuis. À refuser, ou à faire republier.',
+        detail: `annoncé ${error.expected.slice(0, 16)}…, trouvé ${error.found.slice(0, 16)}…`
+      }
+    case 'pack/unreadable-archive':
+      return {
+        message: "Ce pack ne peut pas être ouvert : l'archive est incomplète ou d'un autre format.",
+        detail: error.cause
+      }
+    case 'pack/no-chapter':
+      return {
+        message: "Ce pack ne contient aucune piste jouable. Il n'a rien à faire dans un store.",
+      }
     case 'ui/no-window':
       return { message: 'Aucune fenêtre disponible.' }
     case 'ipc/unknown-channel':

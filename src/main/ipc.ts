@@ -8,6 +8,7 @@ import { buildPack } from '@app/buildPack'
 import { publishPack } from '@app/publishPack'
 import { proposeEntry } from '@app/proposeEntry'
 import { listProposals } from '@app/listProposals'
+import { acceptProposal, awaitingAnswer, declineProposal, listenTo, mayModerate } from '@app/moderate'
 import { DEFAULT_STORE_REPO } from '@infra/config'
 import type { Answer, Channel, Params } from '@shared/contract'
 import { CHANNELS } from '@shared/contract'
@@ -106,6 +107,12 @@ export const registerIpc = (ports: Ports): void => {
 
   handle('propose:store', async () => ok(DEFAULT_STORE_REPO))
   handle('propose:mine', () => listProposals(ports, DEFAULT_STORE_REPO))
+
+  handle('moderate:allowed', () => mayModerate(ports, DEFAULT_STORE_REPO))
+  handle('moderate:awaiting', () => awaitingAnswer(ports, DEFAULT_STORE_REPO))
+  handle('moderate:listen', ({ proposal }) => listenTo(ports, proposal))
+  handle('moderate:accept', ({ number, comment }) => acceptProposal(ports, DEFAULT_STORE_REPO, number, comment))
+  handle('moderate:decline', ({ number, comment }) => declineProposal(ports, DEFAULT_STORE_REPO, number, comment))
 
   handle('propose:open', async () => {
     if (lastProposal === null) return fail({ code: 'propose/store-unreachable', repo: 'aucune proposition' })

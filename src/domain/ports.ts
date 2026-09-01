@@ -2,6 +2,7 @@ import type { DeviceCode, Identity, PollOutcome } from './auth'
 import type { AppError, Result } from './errors'
 import type { FileKind, LocalStory, PickedFile } from './model'
 import type { BuiltPack, PackPlan } from './pack'
+import type { Awaiting, PlayablePack } from './moderation'
 import type { Proposal } from './proposals'
 import type { Proposed, ProposeRequest } from './propose'
 
@@ -100,6 +101,36 @@ export interface GitHubPulls {
   mine(token: string, storeRepo: string): Promise<Result<Proposal[]>>
 }
 
+/**
+ * Answering proposals, for whoever has the right to.
+ *
+ * Separate from `GitHubPulls` because it is the other side of the exchange: one
+ * proposes, the other answers, and only the second needs write access to the
+ * store.
+ */
+export interface GitHubModeration {
+  /** Whether this account may answer proposals on that store at all. */
+  mayModerate(token: string, storeRepo: string): Promise<Result<boolean>>
+  /** Proposals awaiting an answer, whoever wrote them. */
+  awaiting(token: string, storeRepo: string): Promise<Result<Awaiting[]>>
+  /** Accepts: merges the proposal, and the store's own Action regenerates its index. */
+  accept(token: string, storeRepo: string, number: number, comment: string): Promise<Result<void>>
+  /** Refuses: says why, then closes. In that order, so the reason is never lost. */
+  decline(token: string, storeRepo: string, number: number, comment: string): Promise<Result<void>>
+}
+
+/**
+ * Opening a pack to listen to it, without installing anything.
+ *
+ * The moderator's own library is not a dumping ground for proposals they are
+ * about to refuse, so the pack is unzipped into a temporary folder and its audio
+ * granted to the interface through the vault — the same capability that lets a
+ * contributor play their own tracks.
+ */
+export interface PackReader {
+  open(url: string, expectedSha256: string): Promise<Result<PlayablePack>>
+}
+
 /** Where the token sleeps between two sessions. Never in the renderer. */
 export interface TokenStore {
   read(): Promise<Result<string | null>>
@@ -147,6 +178,8 @@ export interface Ports {
   auth: GitHubAuth
   repos: GitHubRepos
   pulls: GitHubPulls
+  moderation: GitHubModeration
+  packReader: PackReader
   tokens: TokenStore
   shell: Shell
   packs: PackWriter

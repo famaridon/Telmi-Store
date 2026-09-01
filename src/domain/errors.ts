@@ -46,6 +46,10 @@ export type AppError =
   | { code: 'github/size-mismatch'; expected: number; found: number }
   | { code: 'propose/fork-too-slow'; repo: string }
   | { code: 'propose/store-unreachable'; repo: string }
+  | { code: 'moderation/not-allowed'; repo: string }
+  | { code: 'pack/checksum-mismatch'; expected: string; found: string }
+  | { code: 'pack/unreadable-archive'; cause: string }
+  | { code: 'pack/no-chapter' }
   | { code: 'ui/no-window' }
   | { code: 'ipc/unknown-channel'; channel: string }
   | { code: 'internal/unexpected'; cause: string }

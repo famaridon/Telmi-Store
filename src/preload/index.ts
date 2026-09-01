@@ -5,6 +5,7 @@ import type { PackPlan } from '@domain/pack'
 import type { PackFile } from '@domain/ports'
 import type { PublishRequest } from '@domain/publish'
 import type { ProposeRequest } from '@domain/propose'
+import type { Awaiting } from '@domain/moderation'
 import type { Answer, Channel, EventChannel, Events, Params } from '@shared/contract'
 import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/contract'
 
@@ -61,6 +62,15 @@ const api = {
     open: () => invoke('propose:open'),
     /** The contributor's own proposals, with what was said on them. */
     mine: () => invoke('propose:mine')
+  },
+
+  moderate: {
+    allowed: () => invoke('moderate:allowed'),
+    awaiting: () => invoke('moderate:awaiting'),
+    /** Opens the pack for listening. Nothing is installed. */
+    listen: (proposal: Awaiting) => invoke('moderate:listen', { proposal }),
+    accept: (number: number, comment: string) => invoke('moderate:accept', { number, comment }),
+    decline: (number: number, comment: string) => invoke('moderate:decline', { number, comment })
   },
 
   packs: {

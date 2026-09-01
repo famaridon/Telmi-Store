@@ -321,15 +321,15 @@ encore été refusée.
 
 ---
 
-## Lot 8 — Modérer
+## Lot 8 — Modérer ✅
 
-**Taille : L.** Dépend de : lots 4 et 7. C'est le lot qui porte la valeur.
+**Livré.** Dépend de : lots 4 et 7. C'est le lot qui porte la valeur.
 
-- [ ] Lister les propositions ouvertes du store, si l'utilisateur y a les droits
-- [ ] Afficher la fiche proprement, droits en évidence
-- [ ] **Écouter** : télécharger le pack, vérifier l'empreinte, le lire dans l'application
-- [ ] **Accepter** : fusionner — l'Action régénère l'index
-- [ ] **Refuser** : fermer avec un commentaire — geste de premier plan, pas une porte de
+- [x] Lister les propositions ouvertes du store, si l'utilisateur y a les droits
+- [x] Afficher la fiche proprement, droits en évidence
+- [x] **Écouter** : télécharger le pack, vérifier l'empreinte, le lire dans l'application
+- [x] **Accepter** : fusionner — l'Action régénère l'index
+- [x] **Refuser** : fermer avec un commentaire — geste de premier plan, pas une porte de
       sortie. Proposer des motifs fréquents pour qu'un refus argumenté coûte trois clics
 
 **Critère d'acceptation.** Boucle complète sur `telmi-store-dev` : proposition envoyée
@@ -340,11 +340,26 @@ qui doit être aussi rapide qu'une acceptation.
 **Ce lot porte l'objectif du projet.** Un store se juge sur ce qu'il a refusé autant que
 sur ce qu'il publie : voir « Dix histoires plutôt que cinq cents » dans le README.
 
-**Décision ouverte.** Installer dans `~/.telmi` pour écouter violerait la règle de
-non-écriture et polluerait la bibliothèque du modérateur avec des propositions qu'il
-refuse. Recommandation : un lecteur intégré, réduit au minimum — décompresser en dossier
-temporaire et jouer les audios dans l'ordre de `nodes.json`. Le lot 2 aura de toute façon
-appris à lire ce fichier.
+**Décision tranchée : lecteur intégré.** Le pack est décompressé dans un dossier
+temporaire et joué par le même mécanisme qui laisse un contributeur écouter ses propres
+pistes — l'identifiant du coffre. Rien n'est installé : la bibliothèque du modérateur ne
+se remplit pas des propositions qu'il refuse.
+
+**L'ordre des pistes est lu dans le pack**, pas devinné d'après les noms de fichiers :
+`actions.m` donne l'ordre du menu, et chaque entrée pointe vers son chapitre. Un pack
+fabriqué par autre chose — le Studio de Telmi-Sync, par exemple — joue donc dans le bon
+ordre lui aussi. Un test le vérifie en inversant le menu.
+
+**Deux ordres qui comptent, testés.** Un refus **dit pourquoi avant de fermer** : si la
+fermeture échoue, le contributeur sait quand même. Une acceptation commente aussi avant de
+fusionner, pour qu'il lise autre chose qu'une notification de merge.
+
+**Un garde-fou en prime.** Une proposition qui touche autre chose que sa fiche et sa
+vignette est signalée : modifier `.github/workflows/` serait une tentative d'altérer
+l'intégration continue du store.
+
+⏳ **Critère d'acceptation restant** : la boucle complète sur `telmi-store-dev` avec deux
+comptes, et un refus argumenté aussi rapide qu'une acceptation.
 
 ---
 
@@ -450,9 +465,6 @@ Telmi-Sync ne le convertit ni à l'import d'un pack Telmi ni au transfert vers l
 donc il arrive intact sur la conteuse — et si un fichier posait problème, l'utilisateur a
 la commande « optimiser l'audio ». Reste à vérifier une fois sur matériel, sans en faire
 un préalable.
-
-**3. Comment écouter en modération ?** *(lot 8)* — lecteur intégré recommandé, plutôt
-qu'une installation dans `~/.telmi`.
 
 **4. Où stocker le jeton ?** *(lot 4)* — `safeStorage` suffit ; à confirmer sous Linux, où
 il peut retomber sur un chiffrement faible selon l'environnement de bureau.

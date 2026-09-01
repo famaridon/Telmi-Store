@@ -6,6 +6,7 @@ import type { PackFile } from '@domain/ports'
 import type { Published, PublishRequest } from '@domain/publish'
 import type { Proposed, ProposeRequest } from '@domain/propose'
 import type { Proposal } from '@domain/proposals'
+import type { Awaiting, PlayablePack } from '@domain/moderation'
 
 /**
  * The transport contract: the only surface through which the interface reaches
@@ -67,6 +68,15 @@ export interface Requests {
   'propose:open': { params: void; result: void }
   /** The contributor's own proposals, with what a moderator said on them. */
   'propose:mine': { params: void; result: Proposal[] }
+
+  /** Whether this account may answer proposals on the store at all. */
+  'moderate:allowed': { params: void; result: boolean }
+  /** Proposals awaiting an answer, oldest first. */
+  'moderate:awaiting': { params: void; result: Awaiting[] }
+  /** Opens the pack a proposal points at, so it can be heard. Installs nothing. */
+  'moderate:listen': { params: { proposal: Awaiting }; result: PlayablePack }
+  'moderate:accept': { params: { number: number; comment: string }; result: void }
+  'moderate:decline': { params: { number: number; comment: string }; result: void }
 }
 
 export type Channel = keyof Requests
@@ -90,7 +100,12 @@ export const CHANNELS = [
   'propose:entry',
   'propose:store',
   'propose:open',
-  'propose:mine'
+  'propose:mine',
+  'moderate:allowed',
+  'moderate:awaiting',
+  'moderate:listen',
+  'moderate:accept',
+  'moderate:decline'
 ] as const satisfies readonly Channel[]
 
 /** Events pushed by the main process to the interface. */

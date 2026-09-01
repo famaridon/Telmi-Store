@@ -2,11 +2,12 @@ import { useState } from 'react'
 import SubmissionScreen from './submission/SubmissionScreen'
 import Library from './Library'
 import ProposalsScreen from './proposals/ProposalsScreen'
+import ModerationScreen from './moderation/ModerationScreen'
 import AccountPanel from './account/AccountPanel'
 import Onboarding from './account/Onboarding'
 import { useAccount } from './account/useAccount'
 
-type Tab = 'submit' | 'proposals' | 'library'
+type Tab = 'submit' | 'proposals' | 'moderate' | 'library'
 
 function App(): React.JSX.Element {
   const account = useAccount()
@@ -58,6 +59,13 @@ function App(): React.JSX.Element {
         >
           Mes propositions
         </button>
+        <button
+          type="button"
+          className={tab === 'moderate' ? 'selected' : ''}
+          onClick={() => setTab('moderate')}
+        >
+          Modération
+        </button>
         <button type="button" className={tab === 'library' ? 'selected' : ''} onClick={() => setTab('library')}>
           Ma bibliothèque
         </button>
@@ -66,6 +74,7 @@ function App(): React.JSX.Element {
       <div className="panel">
         {tab === 'submit' && <SubmissionScreen login={login} />}
         {tab === 'proposals' && <ProposalsScreen login={login} />}
+        {tab === 'moderate' && <ModerationScreen login={login} />}
         {tab === 'library' && <Library />}
       </div>
     </main>
