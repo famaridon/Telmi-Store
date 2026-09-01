@@ -38,11 +38,14 @@ registerFileScheme()
 
 const createWindow = (): void => {
   const window = new BrowserWindow({
-    width: 1180,
-    height: 820,
+    // Taille de repli si la fenetre est restauree : l'application s'ouvre
+    // maximisee, mais une fenetre sait revenir a une taille normale.
+    width: 1280,
+    height: 800,
     minWidth: 960,
     minHeight: 640,
     show: false,
+    backgroundColor: '#2c1049',
     autoHideMenuBar: true,
     title: 'Telmi Store',
     webPreferences: {
@@ -54,6 +57,11 @@ const createWindow = (): void => {
       sandbox: false
     }
   })
+
+  // Maximisee, pas en plein ecran : on garde les commandes de fenetre, parce que
+  // cette application s'utilise a cote de Telmi-Sync. Pour du vrai plein ecran,
+  // « fullscreen: true » ci-dessus suffirait.
+  window.maximize()
 
   window.on('ready-to-show', () => window.show())
 

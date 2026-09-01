@@ -187,6 +187,26 @@ L'interface peut donc **afficher** un fichier sans pouvoir en **lire les octets*
 n'était pas prémédité, mais c'est exactement la posture qu'on veut : les octets ne
 traversent jamais l'IPC ni le JavaScript de la page.
 
+### Langage visuel ✅
+
+L'application reprend celui de Telmi-Sync, relevé dans son `variables.scss` et son
+`App.scss` : fond en **dégradé radial violet** (`#3c1860` → `#250a41`), police **Exo**
+embarquée, surfaces en **blanc translucide** plutôt qu'en gris opaques, **champs de saisie
+blancs**, rayons de **20 px**, **orange** `#ffa900` pour ce qui est sélectionné, et jusqu'aux
+barres de défilement au pouce cyan.
+
+La structure signature est reprise elle aussi : une rangée d'onglets **coiffant** un
+panneau, l'onglet choisi partageant le voile de blanc du contenu et s'y raccordant.
+
+Deux écarts assumés :
+
+- **Cadre natif**, là où Telmi-Sync est en `frame: false` avec sa propre barre de titre.
+  Réimplémenter réduire/agrandir/fermer serait du travail pour une régression probable.
+- **Pas d'avatar GitHub**, parce qu'il faudrait ouvrir la CSP sur un hôte distant.
+
+La fenêtre s'ouvre **maximisée** — pas en plein écran : cette application s'utilise à côté
+de Telmi-Sync, donc on garde les commandes de fenêtre.
+
 ### Convention de langue ✅
 
 **Le code est en anglais, les textes vus par l'utilisateur sont en français.**

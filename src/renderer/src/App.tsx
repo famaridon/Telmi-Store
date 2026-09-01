@@ -40,17 +40,20 @@ function App(): React.JSX.Element {
           </p>
         </div>
         <AccountPanel account={account} />
-        <nav className="tabs">
-          <button type="button" className={tab === 'submit' ? 'selected' : ''} onClick={() => setTab('submit')}>
-            Déposer une histoire
-          </button>
-          <button type="button" className={tab === 'library' ? 'selected' : ''} onClick={() => setTab('library')}>
-            Ma bibliothèque
-          </button>
-        </nav>
       </header>
 
-      {tab === 'submit' ? <SubmissionScreen /> : <Library />}
+      {/* Onglets coiffant un panneau, comme le composant Tabs de Telmi-Sync :
+          l'onglet sélectionné se raccorde visuellement au contenu. */}
+      <nav className="tabs">
+        <button type="button" className={tab === 'submit' ? 'selected' : ''} onClick={() => setTab('submit')}>
+          Déposer une histoire
+        </button>
+        <button type="button" className={tab === 'library' ? 'selected' : ''} onClick={() => setTab('library')}>
+          Ma bibliothèque
+        </button>
+      </nav>
+
+      <div className="panel">{tab === 'submit' ? <SubmissionScreen /> : <Library />}</div>
     </main>
   )
 }
