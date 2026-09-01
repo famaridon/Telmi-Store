@@ -6,6 +6,10 @@ import { createFsFileVault } from '@infra/fsFileVault'
 import { createHttpFetcher } from '@infra/httpFetcher'
 import { createElectronFilePicker } from '@infra/electronFilePicker'
 import { registerFileScheme, serveFileScheme } from '@infra/electronFileProtocol'
+import { createGitHubAuth } from '@infra/githubAuth'
+import { createElectronTokenStore } from '@infra/electronTokenStore'
+import { createElectronBrowser } from '@infra/electronBrowser'
+import { GITHUB_CLIENT_ID } from '@infra/config'
 import { registerIpc, unregisterIpc } from './ipc'
 
 /**
@@ -21,7 +25,11 @@ const wire = (): Ports => {
     library: createFsStoryLibrary(),
     vault,
     picker: createElectronFilePicker(vault),
-    fetcher: createHttpFetcher(vault)
+    fetcher: createHttpFetcher(vault),
+    auth: createGitHubAuth(GITHUB_CLIENT_ID),
+    tokens: createElectronTokenStore(),
+    browser: createElectronBrowser(),
+    sleep: (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000))
   }
 }
 

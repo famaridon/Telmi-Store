@@ -34,6 +34,16 @@ const api = {
     pathOf: (file: File) => webUtils.getPathForFile(file)
   },
 
+  auth: {
+    /** Resolves only when the flow is over. The code arrives via `auth:code`. */
+    signIn: () => invoke('auth:signIn'),
+    cancel: () => invoke('auth:cancel'),
+    restore: () => invoke('auth:restore'),
+    signOut: () => invoke('auth:signOut'),
+    /** Opens the GitHub page of the sign-in under way. Takes no URL. */
+    openVerification: () => invoke('auth:openVerification')
+  },
+
   /** Subscribes to an event pushed by the main process. Returns an unsubscribe. */
   on: <C extends EventChannel>(channel: C, callback: (data: Events[C]) => void): (() => void) => {
     if (!(EVENT_CHANNELS as readonly string[]).includes(channel)) return () => {}

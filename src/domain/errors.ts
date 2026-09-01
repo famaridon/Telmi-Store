@@ -22,6 +22,17 @@ export type AppError =
   | { code: 'url/wrong-type'; type: string; kind: FileKind }
   | { code: 'url/interrupted'; cause: string }
   | { code: 'workdir/unavailable'; cause: string }
+  | { code: 'auth/not-configured' }
+  | { code: 'auth/device-flow-disabled' }
+  | { code: 'auth/github-unreachable'; cause: string }
+  | { code: 'auth/github-refused'; status: number; body: string }
+  | { code: 'auth/denied' }
+  | { code: 'auth/expired' }
+  | { code: 'auth/cancelled' }
+  | { code: 'auth/missing-scope'; granted: string[] }
+  | { code: 'auth/no-session' }
+  | { code: 'token/unwritable'; cause: string }
+  | { code: 'token/unreadable'; cause: string }
   | { code: 'ui/no-window' }
   | { code: 'ipc/unknown-channel'; channel: string }
   | { code: 'internal/unexpected'; cause: string }

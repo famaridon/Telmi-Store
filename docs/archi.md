@@ -229,10 +229,33 @@ sequenceDiagram
 ```
 
 Portée demandée : `public_repo`. Elle suffit à créer un dépôt, y publier une release, et
-ouvrir une *pull request*. Rien de plus n'est demandé.
+ouvrir une *pull request*. Rien de plus n'est demandé — et un jeton qui reviendrait sans
+cette portée est **refusé à la connexion**, plutôt que de casser plus tard en pleine
+publication.
 
-Le stockage du jeton est une décision ouverte — trousseau du système via `safeStorage`
-d'Electron, plutôt qu'un fichier en clair.
+### Ce qui est en place ✅
+
+| Élément | Où |
+| --- | --- |
+| La politique d'attente, en pur | `domain/rules/auth.ts` — `planNextPoll` |
+| L'orchestration du flux | `application/signIn.ts` |
+| Les trois échanges HTTP | `infrastructure/githubAuth.ts` |
+| Le jeton, chiffré par le trousseau | `infrastructure/electronTokenStore.ts` |
+| L'écran | `renderer/src/account/` |
+
+Trois détails qui ne se devinent pas et qui sont couverts par les tests :
+
+- GitHub répond `slow_down` quand on l'interroge trop vite, et **attend que l'intervalle
+  grandisse** de cinq secondes. Un intervalle élargi doit le rester pour les tours suivants.
+- Une tentative qui dépasse `expires_in` doit **s'arrêter d'elle-même** au lieu
+  d'interroger un code déjà mort.
+- Un jeton que GitHub n'honore plus est **effacé** au démarrage : mieux vaut proposer une
+  connexion propre qu'échouer à chaque lancement.
+
+Le jeton est chiffré par `safeStorage` — Keychain sur macOS, DPAPI sur Windows, service de
+secrets sur Linux. Quand le chiffrement est indisponible, typiquement une session Linux
+sans trousseau, **on refuse d'écrire** plutôt que de laisser un jeton en clair : devoir se
+reconnecter est un moindre mal.
 
 ## 6. Publier sans cloner
 

@@ -172,23 +172,47 @@ titres s'entendent au bon moment sur la conteuse.
 
 ---
 
-## Lot 4 — Connexion GitHub par Device Flow
+## Lot 4 — Connexion GitHub par Device Flow ✅
 
-**Taille : M.** Dépend de : rien. Bon candidat pour un soir où l'envie est ailleurs.
+**Livré.** Dépend de : rien.
 
-- [ ] `POST /login/device/code`, puis attente selon l'`interval` renvoyé
-- [ ] Traiter `authorization_pending`, `slow_down`, `expired_token`, `access_denied` —
+- [x] `POST /login/device/code`, puis attente selon l'`interval` renvoyé
+- [x] Traiter `authorization_pending`, `slow_down`, `expired_token`, `access_denied` —
       chacun avec son message
-- [ ] Stocker le jeton avec `safeStorage`, hors du renderer
-- [ ] Écran : le code à saisir, un bouton vers `github.com/login/device`, l'état
-- [ ] Se déconnecter et effacer le jeton
+- [x] Stocker le jeton avec `safeStorage`, hors du renderer
+- [x] Écran : le code à saisir en gros, cliquable pour le copier, un bouton qui ouvre
+      `github.com/login/device`, et l'état
+- [x] Annuler une connexion en cours
+- [x] Se déconnecter et effacer le jeton
+- [x] Refuser un jeton sans la portée nécessaire, plutôt que de le découvrir en pleine
+      publication
+- [x] Oublier un jeton que GitHub n'honore plus, plutôt qu'échouer à chaque démarrage
 
 **Critère d'acceptation.** Se connecter, fermer l'application, la relancer : on est
 toujours connecté, le nom du compte s'affiche, et aucun jeton n'est en clair sur le disque.
 
-**Points d'attention.** Portée `public_repo`, rien de plus. Le jeton ne doit jamais
-traverser l'IPC vers le renderer, même pour affichage. Prérequis humain : créer l'OAuth
-App — voir plus bas.
+**Points d'attention tenus.** Portée `public_repo`, rien de plus. Le jeton ne traverse
+jamais l'IPC : l'interface apprend *qui* est connecté, jamais *avec quoi*. L'avatar GitHub
+a été retiré du modèle, parce que l'afficher aurait obligé à ouvrir la CSP sur
+`avatars.githubusercontent.com` — le renderer ne charge rien depuis le réseau.
+
+⏳ **Reste le prérequis humain** : créer l'OAuth App et cocher « Enable Device Flow ».
+Sans elle, la connexion échoue avec `auth/not-configured`, et l'interface explique quoi
+faire — plutôt que de casser obscurément.
+
+```sh
+# 1. github.com/settings/applications/new
+#    Application name : Telmi Store
+#    Homepage URL     : https://github.com/famaridon/Telmi-Store
+#    Callback URL     : https://github.com/famaridon/Telmi-Store   (inutilisée, mais exigée)
+# 2. Dans les réglages de l'app : cocher « Enable Device Flow »
+# 3. Relever le Client ID, puis :
+TELMI_STORE_GITHUB_CLIENT_ID=Ov23li... npm run dev
+```
+
+Le `client_id` est **public par nature** — c'est tout l'intérêt de ce flux pour une
+application de bureau dont le code est lisible. Il pourra être commité dans
+`src/infrastructure/config.ts` une fois créé.
 
 ---
 

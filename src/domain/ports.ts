@@ -1,3 +1,4 @@
+import type { DeviceCode, Identity, PollOutcome } from './auth'
 import type { AppError, Result } from './errors'
 import type { FileKind, LocalStory, PickedFile } from './model'
 
@@ -39,12 +40,42 @@ export interface Fetcher {
   fetchInto(url: string, kind: FileKind, onProgress: ProgressReport): Promise<Result<PickedFile>>
 }
 
+/**
+ * GitHub's side of the Device Flow. Three exchanges, each returning data:
+ * ask for a code, poll once, then find out whose token it is.
+ */
+export interface GitHubAuth {
+  requestDeviceCode(): Promise<Result<DeviceCode>>
+  /** One poll. An expected refusal is an outcome, not an error. */
+  poll(deviceCode: string): Promise<Result<PollOutcome>>
+  identify(token: string): Promise<Result<Identity>>
+}
+
+/** Where the token sleeps between two sessions. Never in the renderer. */
+export interface TokenStore {
+  read(): Promise<Result<string | null>>
+  write(token: string): Promise<Result<void>>
+  clear(): Promise<Result<void>>
+}
+
+/** Lets the application wait without knowing about timers, so tests run fast. */
+export type Sleep = (seconds: number) => Promise<void>
+
+/** Opens a URL in the contributor's browser. */
+export interface Browser {
+  open(url: string): Promise<void>
+}
+
 /** Everything the use cases need, gathered so the composition root wires it once. */
 export interface Ports {
   library: StoryLibrary
   vault: FileVault
   picker: FilePicker
   fetcher: Fetcher
+  auth: GitHubAuth
+  tokens: TokenStore
+  browser: Browser
+  sleep: Sleep
 }
 
 export type { AppError, Result }

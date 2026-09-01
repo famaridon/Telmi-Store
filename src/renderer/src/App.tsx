@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import SubmissionScreen from './submission/SubmissionScreen'
 import Library from './Library'
+import AccountPanel from './account/AccountPanel'
 
 type Tab = 'submit' | 'library'
 
@@ -16,6 +17,7 @@ function App(): React.JSX.Element {
             Dix histoires que les enfants réclament valent mieux que cinq cents qu’ils zappent.
           </p>
         </div>
+        <AccountPanel />
         <nav className="tabs">
           <button type="button" className={tab === 'submit' ? 'selected' : ''} onClick={() => setTab('submit')}>
             Déposer une histoire

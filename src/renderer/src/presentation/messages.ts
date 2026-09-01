@@ -71,6 +71,54 @@ export const describeError = (error: AppError): ShownError => {
       return { message: 'Le téléchargement a été interrompu. Réessaie.', detail: error.cause }
     case 'workdir/unavailable':
       return { message: 'Impossible de créer le dossier de travail.', detail: error.cause }
+    case 'auth/not-configured':
+      return {
+        message:
+          "La connexion à GitHub n'est pas encore configurée : il manque l'identifiant de " +
+          "l'application. Crée une OAuth App sur github.com/settings/applications/new, " +
+          'coche « Enable Device Flow », puis renseigne son Client ID.',
+        detail: 'variable TELMI_STORE_GITHUB_CLIENT_ID, ou src/infrastructure/config.ts'
+      }
+    case 'auth/device-flow-disabled':
+      return {
+        message:
+          "L'OAuth App existe mais le Device Flow n'y est pas activé. Ouvre ses réglages sur " +
+          'GitHub et coche « Enable Device Flow ».'
+      }
+    case 'auth/github-unreachable':
+      return { message: 'GitHub ne répond pas. Vérifie ta connexion et réessaie.', detail: error.cause }
+    case 'auth/github-refused':
+      return {
+        message: 'GitHub a refusé la demande de connexion.',
+        detail: `${error.status} — ${error.body}`
+      }
+    case 'auth/denied':
+      return { message: "La connexion a été refusée sur GitHub. Rien n'a été enregistré." }
+    case 'auth/expired':
+      return { message: 'Le code a expiré avant que la connexion soit autorisée. Recommence.' }
+    case 'auth/cancelled':
+      return { message: 'Connexion annulée.' }
+    case 'auth/missing-scope':
+      return {
+        message:
+          "Le jeton obtenu ne permet pas de publier : il manque l'autorisation sur les dépôts " +
+          'publics. Reconnecte-toi en acceptant la permission demandée.',
+        detail: `accordé : ${error.granted.join(', ') || 'aucune portée'}`
+      }
+    case 'auth/no-session':
+      return { message: "Aucune connexion n'est en cours." }
+    case 'token/unwritable':
+      return {
+        message:
+          "Impossible d'enregistrer la connexion de façon sûre. Tu resteras connecté le temps " +
+          "de cette session, mais il faudra recommencer au prochain démarrage.",
+        detail: error.cause
+      }
+    case 'token/unreadable':
+      return {
+        message: 'Impossible de relire la connexion enregistrée. Reconnecte-toi.',
+        detail: error.cause
+      }
     case 'ui/no-window':
       return { message: 'Aucune fenêtre disponible.' }
     case 'ipc/unknown-channel':
