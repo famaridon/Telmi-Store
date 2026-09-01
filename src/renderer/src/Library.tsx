@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import type { LocalStory } from '@shared/types'
-import type { IpcError } from '@shared/ipc'
-import { formatBytes } from './submission/useSubmission'
+import type { AppError } from '@domain/errors'
+import type { LocalStory } from '@domain/model'
+import { formatBytes } from './presentation/format'
+import ErrorBanner from './presentation/ErrorBanner'
 
 /**
  * Secondary path: submit a story Telmi-Sync has already built. Read-only —
@@ -9,12 +10,12 @@ import { formatBytes } from './submission/useSubmission'
  */
 function Library(): React.JSX.Element {
   const [stories, setStories] = useState<LocalStory[] | null>(null)
-  const [error, setError] = useState<IpcError | null>(null)
+  const [error, setError] = useState<AppError | null>(null)
 
   useEffect(() => {
-    void window.telmi.library.list().then((r) => {
-      if (r.ok) setStories(r.value)
-      else setError(r.error)
+    void window.telmi.library.list().then((answer) => {
+      if (answer.ok) setStories(answer.value)
+      else setError(answer.error)
     })
   }, [])
 
@@ -29,12 +30,7 @@ function Library(): React.JSX.Element {
         proposer.
       </p>
 
-      {error && (
-        <div className="error" role="alert">
-          <strong>{error.message}</strong>
-          {error.detail && <code>{error.detail}</code>}
-        </div>
-      )}
+      {error && <ErrorBanner error={error} />}
 
       {!error && stories === null && <p className="hint">Lecture de la bibliothèque…</p>}
 

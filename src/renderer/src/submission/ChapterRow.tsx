@@ -1,5 +1,5 @@
-import type { Chapter } from '@shared/types'
-import { formatBytes, formatDuration } from './useSubmission'
+import type { Chapter } from '@domain/model'
+import { formatBytes, formatDuration } from '../presentation/format'
 
 interface Props {
   chapter: Chapter

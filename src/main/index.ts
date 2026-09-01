@@ -1,13 +1,32 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'node:path'
-import { registerIpc } from './ipc'
-import { registerProtocolScheme, serveProtocol } from './protocol'
-import { clearWorkDir } from './download'
+import type { Ports } from '@domain/ports'
+import { createFsStoryLibrary } from '@infra/fsStoryLibrary'
+import { createFsFileVault } from '@infra/fsFileVault'
+import { createHttpFetcher } from '@infra/httpFetcher'
+import { createElectronFilePicker } from '@infra/electronFilePicker'
+import { registerFileScheme, serveFileScheme } from '@infra/electronFileProtocol'
+import { registerIpc, unregisterIpc } from './ipc'
 
-const isDev = !app.isPackaged
+/**
+ * Composition root: the single place where the abstract meets the concrete.
+ *
+ * Everything above this file — domain, use cases — knows only interfaces. This
+ * is where they get their implementations, and the only place that has to change
+ * when one of them does.
+ */
+const wire = (): Ports => {
+  const vault = createFsFileVault()
+  return {
+    library: createFsStoryLibrary(),
+    vault,
+    picker: createElectronFilePicker(vault),
+    fetcher: createHttpFetcher(vault)
+  }
+}
 
-// Must run before app.whenReady(): the scheme has to be known before any load.
-registerProtocolScheme()
+// Must run before app.whenReady(): the scheme has to exist before any load.
+registerFileScheme()
 
 const createWindow = (): void => {
   const window = new BrowserWindow({
@@ -37,18 +56,22 @@ const createWindow = (): void => {
   })
 
   const devUrl = process.env['ELECTRON_RENDERER_URL']
-  if (isDev && devUrl) {
+  if (!app.isPackaged && devUrl) {
     void window.loadURL(devUrl)
   } else {
     void window.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
 
-app.whenReady().then(async () => {
-  await clearWorkDir()
-  serveProtocol()
+const ports = wire()
 
-  registerIpc()
+app.whenReady().then(async () => {
+  // Downloads do not outlive a session.
+  await ports.vault.clear()
+
+  serveFileScheme(ports.vault)
+  unregisterIpc()
+  registerIpc(ports)
   createWindow()
 
   app.on('activate', () => {
@@ -61,5 +84,5 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
-  void clearWorkDir()
+  void ports.vault.clear()
 })

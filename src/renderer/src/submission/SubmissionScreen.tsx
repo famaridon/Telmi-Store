@@ -1,58 +1,56 @@
 import { useCallback, useState } from 'react'
-import type { PickedFile } from '@shared/types'
-import { RIGHTS_STATUSES, formatBytes, formatDuration, useSubmission } from './useSubmission'
+import type { PickedFile } from '@domain/model'
+import { RIGHTS_STATUSES } from '@domain/rules/submission'
+import { describeBlocker, describeWarning, RIGHTS_TEXT } from '../presentation/messages'
+import { formatBytes, formatDuration } from '../presentation/format'
+import ErrorBanner from '../presentation/ErrorBanner'
+import { useSubmission } from './useSubmission'
 import UrlField from './UrlField'
 import ChapterRow from './ChapterRow'
 
 /**
  * The entry screen of the whole project. A parent or a teacher must be able to
- * get through it without a terminal or a text editor: that is the acceptance
- * criterion of stage 1.
+ * get through it without a terminal or a text editor.
  */
 function SubmissionScreen(): React.JSX.Element {
-  const s = useSubmission()
+  const form = useSubmission()
+  const { submission, review } = form
   const [dragging, setDragging] = useState(false)
 
   const dropFiles = useCallback(
     async (files: FileList): Promise<void> => {
-      const paths = Array.from(files).map((f) => window.telmi.files.pathOf(f))
+      const paths = Array.from(files).map((file) => window.telmi.files.pathOf(file))
       if (paths.length === 0) return
-      const r = await window.telmi.files.describe(paths, 'audio')
-      if (r.ok) s.addChapters(r.value)
-      else s.setError(r.error)
+      const answer = await window.telmi.files.admit(paths, 'audio')
+      if (answer.ok) form.addChapters(answer.value)
+      else form.setError(answer.error)
     },
-    [s]
+    [form]
   )
 
   const pickAudios = async (): Promise<void> => {
-    const r = await window.telmi.files.pickAudios()
-    if (r.ok) s.addChapters(r.value)
-    else s.setError(r.error)
+    const answer = await window.telmi.files.pickAudios()
+    if (answer.ok) form.addChapters(answer.value)
+    else form.setError(answer.error)
   }
 
   const pickImage = async (target: 'cover' | string): Promise<void> => {
-    const r = await window.telmi.files.pickImage()
-    if (!r.ok) return s.setError(r.error)
-    const image = r.value[0]
+    const answer = await window.telmi.files.pickImage()
+    if (!answer.ok) return form.setError(answer.error)
+    const image = answer.value[0]
     if (!image) return
-    if (target === 'cover') s.updateField('cover', image)
-    else s.updateChapter(target, { image })
+    if (target === 'cover') form.setField('cover', image)
+    else form.setChapter(target, { image })
   }
 
-  const addCoverFromUrl = (files: PickedFile[]): void => {
+  const setCoverFromUrl = (files: PickedFile[]): void => {
     const image = files[0]
-    if (image) s.updateField('cover', image)
+    if (image) form.setField('cover', image)
   }
 
   return (
     <div className="submission">
-      {s.error && (
-        <div className="error" role="alert">
-          <strong>{s.error.message}</strong>
-          {s.error.detail && <code>{s.error.detail}</code>}
-          <button type="button" className="link" onClick={() => s.setError(null)}>fermer</button>
-        </div>
-      )}
+      {form.error && <ErrorBanner error={form.error} onDismiss={() => form.setError(null)} />}
 
       {/* ----------------------------------------------------------- chapters */}
       <section>
@@ -80,22 +78,22 @@ function SubmissionScreen(): React.JSX.Element {
           <UrlField
             kind="audio"
             placeholder="…ou colle l’adresse d’un mp3"
-            onAdd={s.addChapters}
-            onError={s.setError}
+            onAdd={form.addChapters}
+            onError={form.setError}
           />
         </div>
 
-        {s.submission.chapters.length > 0 && (
+        {submission.chapters.length > 0 && (
           <ul className="chapters">
-            {s.submission.chapters.map((chapter, index) => (
+            {submission.chapters.map((chapter, index) => (
               <ChapterRow
                 key={chapter.key}
                 chapter={chapter}
                 index={index}
-                count={s.submission.chapters.length}
-                onChange={(changes) => s.updateChapter(chapter.key, changes)}
-                onRemove={() => s.removeChapter(chapter.key)}
-                onMove={(direction) => s.moveChapter(chapter.key, direction)}
+                count={submission.chapters.length}
+                onChange={(changes) => form.setChapter(chapter.key, changes)}
+                onRemove={() => form.removeChapter(chapter.key)}
+                onMove={(direction) => form.moveChapter(chapter.key, direction)}
                 onPickImage={() => void pickImage(chapter.key)}
               />
             ))}
@@ -112,9 +110,9 @@ function SubmissionScreen(): React.JSX.Element {
             <label>
               Titre
               <input
-                value={s.submission.title}
+                value={submission.title}
                 placeholder="Les contes de la mère Pauline"
-                onChange={(e) => s.updateField('title', e.target.value)}
+                onChange={(e) => form.setField('title', e.target.value)}
               />
             </label>
 
@@ -125,34 +123,31 @@ function SubmissionScreen(): React.JSX.Element {
                   type="number"
                   min={0}
                   max={18}
-                  value={s.submission.minAge}
-                  onChange={(e) => s.updateField('minAge', Math.max(0, Math.min(18, Number(e.target.value) || 0)))}
+                  value={submission.minAge}
+                  onChange={(e) => form.setField('minAge', Math.max(0, Math.min(18, Number(e.target.value) || 0)))}
                 />
               </label>
               <label>
                 Catégorie
                 <input
-                  value={s.submission.category}
+                  value={submission.category}
                   placeholder="Contes"
-                  onChange={(e) => s.updateField('category', e.target.value)}
+                  onChange={(e) => form.setField('category', e.target.value)}
                 />
               </label>
               <label>
                 Langue
                 <input
-                  value={s.submission.language}
+                  value={submission.language}
                   maxLength={5}
-                  onChange={(e) => s.updateField('language', e.target.value)}
+                  onChange={(e) => form.setField('language', e.target.value)}
                 />
               </label>
             </div>
 
             <label>
               Question du menu
-              <input
-                value={s.submission.question}
-                onChange={(e) => s.updateField('question', e.target.value)}
-              />
+              <input value={submission.question} onChange={(e) => form.setField('question', e.target.value)} />
               <small>Dite avant la liste. Laisse vide pour aller droit au menu.</small>
             </label>
 
@@ -160,24 +155,24 @@ function SubmissionScreen(): React.JSX.Element {
               Description
               <textarea
                 rows={5}
-                value={s.submission.description}
+                value={submission.description}
                 placeholder="De quoi parlent ces histoires, pour qui, par qui…"
-                onChange={(e) => s.updateField('description', e.target.value)}
+                onChange={(e) => form.setField('description', e.target.value)}
               />
             </label>
           </div>
 
           <div className="cover">
             <h3>Couverture</h3>
-            {s.submission.cover ? (
-              <img src={window.telmi.fileUrl(s.submission.cover.id)} alt="" />
+            {submission.cover ? (
+              <img src={window.telmi.fileUrl(submission.cover.id)} alt="" />
             ) : (
               <div className="no-image large">obligatoire</div>
             )}
             <button type="button" onClick={() => void pickImage('cover')}>
-              {s.submission.cover ? 'Changer' : 'Choisir une image'}
+              {submission.cover ? 'Changer' : 'Choisir une image'}
             </button>
-            <UrlField kind="image" placeholder="…ou une adresse" onAdd={addCoverFromUrl} onError={s.setError} />
+            <UrlField kind="image" placeholder="…ou une adresse" onAdd={setCoverFromUrl} onError={form.setError} />
           </div>
         </div>
       </section>
@@ -193,17 +188,17 @@ function SubmissionScreen(): React.JSX.Element {
         <div className="rights">
           {RIGHTS_STATUSES.map((status) => (
             <label
-              key={status.value}
-              className={s.submission.rights.status === status.value ? 'choice selected' : 'choice'}
+              key={status}
+              className={submission.rights.status === status ? 'choice selected' : 'choice'}
             >
               <input
                 type="radio"
                 name="rights"
-                checked={s.submission.rights.status === status.value}
-                onChange={() => s.updateRights('status', status.value)}
+                checked={submission.rights.status === status}
+                onChange={() => form.setRights('status', status)}
               />
-              <span className="choice-label">{status.label}</span>
-              <span className="choice-hint">{status.hint}</span>
+              <span className="choice-label">{RIGHTS_TEXT[status].label}</span>
+              <span className="choice-hint">{RIGHTS_TEXT[status].hint}</span>
             </label>
           ))}
         </div>
@@ -212,17 +207,17 @@ function SubmissionScreen(): React.JSX.Element {
           <label>
             Source
             <input
-              value={s.submission.rights.source}
+              value={submission.rights.source}
               placeholder="https://… ou « enregistré par moi-même »"
-              onChange={(e) => s.updateRights('source', e.target.value)}
+              onChange={(e) => form.setRights('source', e.target.value)}
             />
           </label>
           <label>
             Déclaré par
             <input
-              value={s.submission.rights.declaredBy}
+              value={submission.rights.declaredBy}
               placeholder="@pseudo"
-              onChange={(e) => s.updateRights('declaredBy', e.target.value)}
+              onChange={(e) => form.setRights('declaredBy', e.target.value)}
             />
           </label>
         </div>
@@ -233,37 +228,37 @@ function SubmissionScreen(): React.JSX.Element {
         <h2>Récapitulatif</h2>
 
         <div className="totals">
-          <div><b>{s.submission.chapters.length}</b><span>piste(s)</span></div>
-          <div><b>{formatDuration(s.totalDuration)}</b><span>durée totale</span></div>
-          <div><b>{formatBytes(s.totalBytes)}</b><span>fichiers déposés</span></div>
+          <div><b>{submission.chapters.length}</b><span>piste(s)</span></div>
+          <div><b>{formatDuration(review.totalDuration)}</b><span>durée totale</span></div>
+          <div><b>{formatBytes(review.totalBytes)}</b><span>fichiers déposés</span></div>
         </div>
 
-        {s.blockers.length > 0 && (
+        {review.blockers.length > 0 && (
           <div className="blockers">
             <h3>Il reste à faire</h3>
             <ul>
-              {s.blockers.map((blocker, i) => (
-                <li key={i}>{blocker.message}</li>
+              {review.blockers.map((blocker, i) => (
+                <li key={i}>{describeBlocker(blocker)}</li>
               ))}
             </ul>
           </div>
         )}
 
-        {s.warnings.length > 0 && (
+        {review.warnings.length > 0 && (
           <div className="warnings">
             <h3>Bon à savoir</h3>
             <ul>
-              {s.warnings.map((warning, i) => (
-                <li key={i}>{warning}</li>
+              {review.warnings.map((warning, i) => (
+                <li key={i}>{describeWarning(warning)}</li>
               ))}
             </ul>
           </div>
         )}
 
-        <button type="button" className="primary" disabled={!s.ready}>
+        <button type="button" className="primary" disabled={!review.ready}>
           Fabriquer le pack
         </button>
-        {s.ready && (
+        {review.ready && (
           <p className="hint">
             La fabrication est l’étape suivante : ce bouton sera branché sur la génération du
             pack Telmi.

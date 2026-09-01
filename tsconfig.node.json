@@ -4,8 +4,12 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2023"],
-    "types": ["node"],
+    "lib": [
+      "ES2023"
+    ],
+    "types": [
+      "node"
+    ],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
@@ -14,12 +18,30 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "paths": { "@shared/*": ["./src/shared/*"] }
+    "paths": {
+      "@domain/*": [
+        "./src/domain/*"
+      ],
+      "@app/*": [
+        "./src/application/*"
+      ],
+      "@infra/*": [
+        "./src/infrastructure/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ]
+    }
   },
   "include": [
     "electron.vite.config.ts",
+    "vitest.config.ts",
+    "src/domain/**/*",
+    "src/application/**/*",
+    "src/infrastructure/**/*",
+    "src/shared/**/*",
     "src/main/**/*",
     "src/preload/**/*",
-    "src/shared/**/*"
+    "tests/**/*"
   ]
 }

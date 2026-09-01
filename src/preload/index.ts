@@ -1,18 +1,19 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
-import type { Channel, EventChannel, Events, Params, Result, ResultOf } from '@shared/ipc'
-import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/ipc'
-import type { FileKind } from '@shared/types'
+import { fail } from '@domain/errors'
+import type { FileKind } from '@domain/model'
+import type { Answer, Channel, EventChannel, Events, Params } from '@shared/contract'
+import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/contract'
 
 /**
- * The single bridge between the interface and the system. We do not expose
- * `ipcRenderer` but functions that reject any channel absent from the contract,
- * so the interface cannot invent a call.
+ * The single bridge between the interface and the system. `ipcRenderer` is never
+ * exposed: only functions that reject any channel absent from the contract, so
+ * the interface cannot invent a call.
  */
-const invoke = async <C extends Channel>(channel: C, params?: Params<C>): Promise<Result<ResultOf<C>>> => {
+const invoke = async <C extends Channel>(channel: C, params?: Params<C>): Promise<Answer<C>> => {
   if (!(CHANNELS as readonly string[]).includes(channel)) {
-    return { ok: false, error: { code: 'ipc/unknown-channel', message: 'Appel refusé.', detail: channel } }
+    return fail({ code: 'ipc/unknown-channel', channel })
   }
-  return (await ipcRenderer.invoke(channel, params)) as Result<ResultOf<C>>
+  return (await ipcRenderer.invoke(channel, params)) as Answer<C>
 }
 
 const api = {
@@ -23,8 +24,8 @@ const api = {
   files: {
     pickAudios: () => invoke('files:pick', { kind: 'audio', multiple: true }),
     pickImage: () => invoke('files:pick', { kind: 'image', multiple: false }),
-    describe: (paths: string[], kind: FileKind) => invoke('files:describe', { paths, kind }),
-    download: (url: string, kind: FileKind) => invoke('files:download', { url, kind }),
+    admit: (paths: string[], kind: FileKind) => invoke('files:admit', { paths, kind }),
+    fetch: (url: string, kind: FileKind) => invoke('files:fetch', { url, kind }),
 
     /**
      * Path of a dropped file. `webUtils` is the only way since Electron removed
@@ -41,7 +42,7 @@ const api = {
     return () => ipcRenderer.off(channel, listener)
   },
 
-  /** URL to give an <img> or an <audio> for an allowed file. */
+  /** URL to give an <img> or an <audio> for an admitted file. */
   fileUrl: (id: string) => `${FILE_SCHEME}://local/${id}`
 } as const
 

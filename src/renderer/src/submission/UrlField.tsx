@@ -1,15 +1,15 @@
 import { useState } from 'react'
-import type { FileKind, PickedFile } from '@shared/types'
-import type { IpcError } from '@shared/ipc'
+import type { AppError } from '@domain/errors'
+import type { FileKind, PickedFile } from '@domain/model'
 
 interface Props {
   kind: FileKind
   placeholder: string
   onAdd: (files: PickedFile[]) => void
-  onError: (error: IpcError) => void
+  onError: (error: AppError) => void
 }
 
-/** URL field with progress: the download happens in the main process. */
+/** URL field with progress: the fetch itself happens in the main process. */
 function UrlField({ kind, placeholder, onAdd, onError }: Props): React.JSX.Element {
   const [url, setUrl] = useState('')
   const [busy, setBusy] = useState(false)
@@ -21,22 +21,22 @@ function UrlField({ kind, placeholder, onAdd, onError }: Props): React.JSX.Eleme
 
     setBusy(true)
     setProgress('connexion…')
-    const unsubscribe = window.telmi.on('download:progress', ({ received, total }) => {
+    const unsubscribe = window.telmi.on('fetch:progress', ({ received, total }) => {
       setProgress(
         total === null ? `${(received / 1024 ** 2).toFixed(1)} Mo reçus` : `${Math.round((received / total) * 100)} %`
       )
     })
 
-    const r = await window.telmi.files.download(address, kind)
+    const answer = await window.telmi.files.fetch(address, kind)
     unsubscribe()
     setBusy(false)
     setProgress(null)
 
-    if (r.ok) {
-      onAdd([r.value])
+    if (answer.ok) {
+      onAdd([answer.value])
       setUrl('')
     } else {
-      onError(r.error)
+      onError(answer.error)
     }
   }
 

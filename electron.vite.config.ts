@@ -2,24 +2,29 @@ import { resolve } from 'node:path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 
-// Trois cibles distinctes, trois bundles distincts. Le renderer n'a aucun accès
-// à Node : tout passe par le preload et le contrat d'IPC (src/shared/ipc.ts).
+/**
+ * Three targets, three bundles. The aliases carry the layering: see
+ * docs/archi.md and tests/architecture.test.ts, which enforces it.
+ */
+const layers = {
+  '@domain': resolve('src/domain'),
+  '@app': resolve('src/application'),
+  '@infra': resolve('src/infrastructure'),
+  '@shared': resolve('src/shared')
+}
+
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
-    resolve: { alias: { '@shared': resolve('src/shared') } }
+    resolve: { alias: layers }
   },
   preload: {
     plugins: [externalizeDepsPlugin()],
-    resolve: { alias: { '@shared': resolve('src/shared') } }
+    resolve: { alias: layers }
   },
   renderer: {
     plugins: [react()],
-    resolve: {
-      alias: {
-        '@shared': resolve('src/shared'),
-        '@renderer': resolve('src/renderer/src')
-      }
-    }
+    // The renderer reaches the domain and the contract, never an adapter.
+    resolve: { alias: { ...layers, '@renderer': resolve('src/renderer/src') } }
   }
 })
