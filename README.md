@@ -114,10 +114,21 @@ est décrite dans [docs/archi.md](docs/archi.md).
 ```sh
 npm install
 npm run dev          # lance l'application avec rechargement à chaud
+npm run test         # règles du domaine, adaptateurs, barrière d'architecture
 npm run typecheck    # vérifie les trois cibles
 npm run build        # compile main, preload et renderer
+npm run apercu       # capture les écrans dans outils/apercu/, sans souris
 npm run dist:mac     # produit un .dmg
 ```
+
+Pour que la connexion GitHub fonctionne, il faut une OAuth App avec le Device Flow activé :
+
+```sh
+TELMI_STORE_GITHUB_CLIENT_ID=Ov23li… npm run dev
+```
+
+Sans elle, l'application explique quoi créer au lieu de casser. Voir
+[projet.md](projet.md), lot 4.
 
 Node 22.13 ou plus récent.
 

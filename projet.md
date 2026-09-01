@@ -182,6 +182,10 @@ titres s'entendent au bon moment sur la conteuse.
 - [x] Stocker le jeton avec `safeStorage`, hors du renderer
 - [x] Écran : le code à saisir en gros, cliquable pour le copier, un bouton qui ouvre
       `github.com/login/device`, et l'état
+- [x] **Onboarding** : quand personne n'est connecté, l'application ouvre sur une page qui
+      dit ce qu'elle fait, répond à « pourquoi un compte GitHub ? », et propose la
+      connexion — avec une échappatoire « découvrir sans compte », puisqu'une histoire peut
+      se préparer sans compte et que seule la publication en demande un
 - [x] Annuler une connexion en cours
 - [x] Se déconnecter et effacer le jeton
 - [x] Refuser un jeton sans la portée nécessaire, plutôt que de le découvrir en pleine

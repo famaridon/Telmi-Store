@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { DeviceCode, Session } from '@domain/auth'
+import type { DeviceCode, Identity } from '@domain/auth'
 import type { AppError } from '@domain/errors'
 
 /**
@@ -14,7 +14,7 @@ export type AccountState =
   | { step: 'anonymous' }
   | { step: 'starting' }
   | { step: 'waiting'; code: DeviceCode }
-  | { step: 'signedIn'; session: Session }
+  | { step: 'signedIn'; identity: Identity; scopes: string[] }
 
 export interface Account {
   state: AccountState
@@ -38,7 +38,11 @@ export const useAccount = (): Account => {
         setState({ step: 'anonymous' })
         return
       }
-      setState(answer.value === null ? { step: 'anonymous' } : { step: 'signedIn', session: answer.value })
+      setState(
+        answer.value === null
+          ? { step: 'anonymous' }
+          : { step: 'signedIn', identity: answer.value.identity, scopes: answer.value.scopes }
+      )
     })
   }, [])
 
@@ -56,7 +60,9 @@ export const useAccount = (): Account => {
     setError(null)
     setState({ step: 'starting' })
     void window.telmi.auth.signIn().then((answer) => {
-      if (answer.ok) setState({ step: 'signedIn', session: answer.value })
+      if (answer.ok) {
+        setState({ step: 'signedIn', identity: answer.value.identity, scopes: answer.value.scopes })
+      }
       else {
         // A cancellation is a choice, not a failure worth reporting.
         if (answer.error.code !== 'auth/cancelled') setError(answer.error)

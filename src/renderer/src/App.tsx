@@ -2,11 +2,33 @@ import { useState } from 'react'
 import SubmissionScreen from './submission/SubmissionScreen'
 import Library from './Library'
 import AccountPanel from './account/AccountPanel'
+import Onboarding from './account/Onboarding'
+import { useAccount } from './account/useAccount'
 
 type Tab = 'submit' | 'library'
 
 function App(): React.JSX.Element {
+  const account = useAccount()
   const [tab, setTab] = useState<Tab>('submit')
+  /**
+   * Set by "découvrir sans compte". The onboarding is a doorway, not a wall: a
+   * submission can be prepared without an account, only publishing needs one.
+   */
+  const [exploring, setExploring] = useState(false)
+
+  // Restoring a kept token takes a moment; showing the onboarding meanwhile
+  // would make it flash for someone who is in fact already signed in.
+  if (account.state.step === 'loading') {
+    return (
+      <main className="splash">
+        <p className="quiet">Telmi Store…</p>
+      </main>
+    )
+  }
+
+  if (account.state.step !== 'signedIn' && !exploring) {
+    return <Onboarding account={account} onExplore={() => setExploring(true)} />
+  }
 
   return (
     <main>
@@ -17,7 +39,7 @@ function App(): React.JSX.Element {
             Dix histoires que les enfants réclament valent mieux que cinq cents qu’ils zappent.
           </p>
         </div>
-        <AccountPanel />
+        <AccountPanel account={account} />
         <nav className="tabs">
           <button type="button" className={tab === 'submit' ? 'selected' : ''} onClick={() => setTab('submit')}>
             Déposer une histoire

@@ -12,3 +12,4 @@ sources.json
 __pycache__/
 *.pyc
 *.tsbuildinfo
+outils/apercu/

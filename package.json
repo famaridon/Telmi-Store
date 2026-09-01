@@ -14,11 +14,12 @@
     "preview": "electron-vite preview",
     "build": "npm run typecheck && electron-vite build",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
-    "typecheck:web": "tsc -p tsconfig.web.json --noEmit",
+    "typecheck:node": "tsc -p tsconfig.node.json --noEmit --pretty false",
+    "typecheck:web": "tsc -p tsconfig.web.json --noEmit --pretty false",
     "dist:mac": "npm run build && electron-builder --mac",
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "apercu": "npm run build && node outils/apercu.mjs"
   },
   "dependencies": {
     "react": "19.2.8",
