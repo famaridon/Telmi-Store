@@ -52,6 +52,38 @@ export interface GitHubAuth {
   identify(token: string): Promise<Result<Identity>>
 }
 
+/** An asset published in a release, as the world can now reach it. */
+export interface PublishedAsset {
+  /** Stable public URL. Redirects to a signed one, which is normal. */
+  url: string
+  bytes: number
+}
+
+/**
+ * Publishing the pack in a repository the CONTRIBUTOR owns.
+ *
+ * Every operation is idempotent, because a publication interrupted halfway must
+ * be resumable: relaunching must not create a second repository, a duplicate
+ * release, or two assets of the same name.
+ */
+export interface GitHubRepos {
+  /** Creates the repository if absent. Rends its « owner/name ». */
+  ensureRepo(token: string, name: string, description: string): Promise<Result<string>>
+  /** Creates the release for that tag if absent. Rends its id. */
+  ensureRelease(token: string, repo: string, tag: string, body: string): Promise<Result<number>>
+  /** Replaces any asset already carrying that name. */
+  putAsset(
+    token: string,
+    repo: string,
+    releaseId: number,
+    fileName: string,
+    path: string,
+    onProgress: ProgressReport
+  ): Promise<Result<PublishedAsset>>
+  /** Confirms the public URL answers, and with the size we uploaded. */
+  checkPublic(url: string, expectedBytes: number): Promise<Result<void>>
+}
+
 /** Where the token sleeps between two sessions. Never in the renderer. */
 export interface TokenStore {
   read(): Promise<Result<string | null>>
@@ -97,6 +129,7 @@ export interface Ports {
   picker: FilePicker
   fetcher: Fetcher
   auth: GitHubAuth
+  repos: GitHubRepos
   tokens: TokenStore
   shell: Shell
   packs: PackWriter

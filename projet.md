@@ -241,25 +241,34 @@ TELMI_STORE_GITHUB_CLIENT_ID=Ov23li… npm run dev
 
 ---
 
-## Lot 5 — Fiche et publication du pack
+## Lot 5 — Fiche et publication du pack ✅
 
-**Taille : M.** Dépend de : lots 2 et 4.
+**Livré.** Dépend de : lots 2 et 4.
 
-- [ ] Construire la fiche depuis le formulaire, avec `sha256`, `taille`, `uuid`, `version`
-- [ ] Générer le `slug` et vérifier qu'il est libre dans le store visé
-- [ ] Créer le dépôt d'accueil chez le contributeur, ou réutiliser l'existant
-- [ ] Créer la release taguée `<slug>-<version>`, jamais `latest`
-- [ ] Envoyer l'asset avec une barre de progression
-- [ ] Vérifier après envoi que l'URL publique répond et que le `sha256` correspond
+- [x] Construire la fiche depuis le formulaire, avec `sha256`, `taille`, `uuid`, `version`
+- [x] Générer le `slug` et vérifier qu'il est libre dans le store visé
+- [x] Créer le dépôt d'accueil chez le contributeur, ou réutiliser l'existant
+- [x] Créer la release taguée `<slug>-<version>`, jamais `latest`
+- [x] Envoyer l'asset avec une barre de progression
+- [x] Vérifier après envoi que l'URL publique répond et que le `sha256` correspond
 
-**Critère d'acceptation.** La fiche est acceptée par `outils/verifier-fiches.mjs` du dépôt
-de store sans retouche, et le pack est téléchargeable par une URL publique dont
-l'empreinte correspond.
+**Critère d'acceptation ✅ pour la fiche.** Une fiche produite par l'application a été
+soumise au vérificateur du store : `toutes les fiches sont valides`, sans retouche. Ses
+treize règles sont en plus reprises une par une dans les tests.
 
-**Points d'attention.** **Idempotence** : relancer une publication interrompue ne doit
-créer ni second dépôt ni release en double. Un asset de plusieurs centaines de mégaoctets
-prend plusieurs minutes sur une ligne domestique : l'échec doit être lisible et l'état
-récupérable.
+⏳ **Reste la publication réelle** : créer un dépôt et envoyer un pack sur GitHub est une
+action visible sur ton compte, je ne l'ai pas déclenchée. L'adaptateur est écrit et câblé,
+mais contrairement au Device Flow il n'a pas encore rencontré l'API.
+
+**Points d'attention tenus.** Chaque étape demande d'abord si la chose existe : dépôt,
+release, et jusqu'à l'asset, remplacé plutôt que refusé. Ce n'est pas de la politesse — un
+envoi de deux cents mégaoctets échoue assez souvent pour que **reprendre soit le cas
+normal**, et une seconde tentative ne doit pas laisser derrière elle une traînée de
+doublons. Les messages d'erreur le disent : « relance la publication : elle reprendra où
+elle en était ».
+
+La barre de progression existe parce que `fetch` n'en donne aucune : l'envoi passe par
+`node:https` et compte les octets au fil du flux.
 
 ---
 

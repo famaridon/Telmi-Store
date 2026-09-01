@@ -51,6 +51,36 @@ contextBridge.exposeInMainWorld('telmi', {
     }),
     reveal: async () => ({ ok: true, value: undefined })
   },
+
+  publish: {
+    pack: async () => ({
+      ok: true,
+      value: {
+        repo: 'famaridon/les-contes-de-la-mere-pauline',
+        tag: 'les-contes-de-la-mere-pauline-1.0.0',
+        url: 'https://github.com/famaridon/les-contes-de-la-mere-pauline/releases/download/les-contes-de-la-mere-pauline-1.0.0/les-contes-de-la-mere-pauline.zip',
+        entry: {
+          slug: 'les-contes-de-la-mere-pauline',
+          title: 'Les contes de la mère Pauline',
+          minAge: 3,
+          category: 'Contes',
+          language: 'fr',
+          description: 'Cinq contes écrits et lus par Pauline Pucciano.',
+          uuid: 'fffffc-19c420b4422',
+          version: 1,
+          rights: { status: 'public-domain', source: 'https://litteratureaudio.com', declaredBy: '@famaridon' },
+          pack: {
+            kind: 'release',
+            repo: 'famaridon/les-contes-de-la-mere-pauline',
+            tag: 'les-contes-de-la-mere-pauline-1.0.0',
+            file: 'les-contes-de-la-mere-pauline.zip',
+            sha256: '46ac1cd04418e255e60a266189b3529c150ea18c0f0f8009911b21d777962017',
+            bytes: 24318442
+          }
+        }
+      }
+    })
+  },
   auth: {
     restore: async () =>
       ETAT === 'signedIn' || ETAT === 'rempli'
@@ -65,7 +95,8 @@ contextBridge.exposeInMainWorld('telmi', {
     if (canal === 'auth:code') poserCode = rappel
     return () => {}
   },
-  fileUrl: (id) => 'about:blank#' + id
+  // Une image en data: — autorisee par la CSP — pour que le canvas puisse dessiner
+  fileUrl: () => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAF0lEQVQI12NkYPjPwMDAxMDAwMjAwAAADiwBLYaMEXcAAAAASUVORK5CYII='
 })
 
 // En etat « waiting », on pousse le code juste apres le montage.

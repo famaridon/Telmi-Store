@@ -5,6 +5,7 @@ import type { Ports } from '@domain/ports'
 import { admitPaths, fetchFromUrl, listLibrary, pickFiles } from '@app/usecases'
 import { restoreSession, signIn, signOut } from '@app/signIn'
 import { buildPack } from '@app/buildPack'
+import { publishPack } from '@app/publishPack'
 import type { Answer, Channel, Params } from '@shared/contract'
 import { CHANNELS } from '@shared/contract'
 
@@ -84,6 +85,10 @@ export const registerIpc = (ports: Ports): void => {
     if (built.ok) lastPack = built.value.path
     return built
   })
+
+  handle('publish:pack', (request) =>
+    publishPack(ports, request, (sent, total) => emit('publish:progress', { sent, total }))
+  )
 
   handle('pack:reveal', async () => {
     if (lastPack === null) return fail({ code: 'pack/unwritable', cause: 'aucun pack construit' })

@@ -15,7 +15,12 @@ import ChapterRow from './ChapterRow'
  * The entry screen of the whole project. A parent or a teacher must be able to
  * get through it without a terminal or a text editor.
  */
-function SubmissionScreen(): React.JSX.Element {
+interface Props {
+  /** The signed-in login, or null when someone chose to look around first. */
+  login: string | null
+}
+
+function SubmissionScreen({ login }: Props): React.JSX.Element {
   const form = useSubmission()
   const { submission, review } = form
   const voices = useVoices(submission)
@@ -262,7 +267,13 @@ function SubmissionScreen(): React.JSX.Element {
           </div>
         )}
 
-        <BuildPanel submission={submission} uuid={form.uuid} ready={review.ready} voices={voices} />
+        <BuildPanel
+          submission={submission}
+          uuid={form.uuid}
+          ready={review.ready}
+          voices={voices}
+          login={login}
+        />
       </section>
     </div>
   )

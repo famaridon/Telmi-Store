@@ -3,6 +3,7 @@ import { fail } from '@domain/errors'
 import type { FileKind } from '@domain/model'
 import type { PackPlan } from '@domain/pack'
 import type { PackFile } from '@domain/ports'
+import type { PublishRequest } from '@domain/publish'
 import type { Answer, Channel, EventChannel, Events, Params } from '@shared/contract'
 import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/contract'
 
@@ -44,6 +45,11 @@ const api = {
     signOut: () => invoke('auth:signOut'),
     /** Opens the GitHub page of the sign-in under way. Takes no URL. */
     openVerification: () => invoke('auth:openVerification')
+  },
+
+  publish: {
+    /** Resolves once the pack is fetchable by anyone. */
+    pack: (request: PublishRequest) => invoke('publish:pack', request)
   },
 
   packs: {

@@ -9,6 +9,10 @@ import { glob } from 'node:fs/promises'
  * A convention nobody checks decays within a month. These tests read the import
  * statements of every source file and fail on a forbidden dependency, so the
  * direction of the arrows is a build error rather than a code-review argument.
+ *
+ * It has earned its place several times: a French comment left in an adapter, a
+ * default label written in the domain, and a release body composed in the
+ * application layer were all caught here rather than in review.
  */
 
 const sourcesOf = async (pattern: string): Promise<string[]> => {
@@ -42,10 +46,10 @@ interface Rule {
 const NODE = { specifier: /^node:|^fs$|^path$|^os$|^crypto$|^stream$|^http$/, why: 'Node' }
 const ELECTRON = { specifier: /^electron$/, why: 'Electron' }
 const REACT = { specifier: /^react$|^react-dom/, why: 'React' }
-const INFRA = { specifier: /^@infra\//, why: 'un adaptateur' }
-const APP = { specifier: /^@app\//, why: "la couche application" }
-const SHARED = { specifier: /^@shared\//, why: 'le contrat de transport' }
-const RENDERER = { specifier: /^@renderer\/|^\.\.\/renderer/, why: "l'interface" }
+const INFRA = { specifier: /^@infra\//, why: 'an adapter' }
+const APP = { specifier: /^@app\//, why: 'the application layer' }
+const SHARED = { specifier: /^@shared\//, why: 'the transport contract' }
+const RENDERER = { specifier: /^@renderer\/|^\.\.\/renderer/, why: 'the interface' }
 
 const RULES: Rule[] = [
   {
@@ -79,11 +83,11 @@ const RULES: Rule[] = [
 ]
 
 describe.each(RULES)('$layer', ({ layer, pattern, forbidden }) => {
-  it('a des fichiers a verifier', async () => {
+  it('has files to check', async () => {
     expect((await sourcesOf(pattern)).length).toBeGreaterThan(0)
   })
 
-  it("n'importe rien qui lui soit interdit", async () => {
+  it('imports nothing it is forbidden to', async () => {
     const offences: string[] = []
     for (const path of await sourcesOf(pattern)) {
       for (const specifier of importsOf(path)) {
@@ -94,15 +98,15 @@ describe.each(RULES)('$layer', ({ layer, pattern, forbidden }) => {
         }
       }
     }
-    expect(offences, `${layer} : ${offences.length} dependance(s) interdite(s)`).toEqual([])
+    expect(offences, `${layer}: ${offences.length} forbidden dependency(ies)`).toEqual([])
   })
 })
 
-describe('langue', () => {
-  it("ne laisse aucun texte français hors de l'interface", async () => {
-    // Le code est en anglais, les textes vus par l'utilisateur sont en français, et
-    // ces derniers ne vivent que dans src/renderer. Une phrase accentuée ailleurs est
-    // une règle de présentation qui a fui dans une autre couche.
+describe('language', () => {
+  it('leaves no French text outside the interface', async () => {
+    // Code is English, user-facing text is French, and the latter lives only in
+    // src/renderer. An accented sentence anywhere else is a presentation concern
+    // that leaked into another layer.
     const accented = /[àâäçéèêëîïôöùûüÿœæÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆ]/
     const offences: string[] = []
     for (const path of await sourcesOf('src/**/*.{ts,tsx}')) {
@@ -117,7 +121,7 @@ describe('langue', () => {
 })
 
 describe('composition root', () => {
-  it('est le seul endroit qui instancie les adaptateurs', async () => {
+  it('is the only place that instantiates adapters', async () => {
     const wiring: string[] = []
     for (const path of await sourcesOf('src/**/*.{ts,tsx}')) {
       if (path.endsWith('src/main/index.ts')) continue

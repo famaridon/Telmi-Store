@@ -367,10 +367,12 @@ src/
 │   ├── errors.ts              ✅ AppError (union discriminée), Result<T>
 │   ├── ports.ts               ✅ StoryLibrary, FileVault, FilePicker, Fetcher
 │   ├── pack.ts               ✅ la forme d'un pack : stages, actions, marqueurs
+│   ├── publish.ts            ✅ ce qu'une publication demande, et ce qu'elle produit
 │   └── rules/
 │       ├── submission.ts      ✅ reviewSubmission : ce qui bloque, ce qui avertit
 │       ├── files.ts           ✅ extensions, types MIME, nom d'un téléchargement
 │       ├── pack.ts            ✅ planPack : tout ce que le pack contiendra
+│       ├── entry.ts           ✅ la fiche, et son passage en français
 │       └── imageLayout.ts     ✅ découpe du texte et cadrage, sans canvas
 ├── application/
 │   └── usecases.ts            ✅ listLibrary, pickFiles, admitPaths, fetchFromUrl
@@ -408,6 +410,7 @@ src/
     │   └── UrlField.tsx       ✅
     ├── build/             ✅ dessin sur canvas et suivi de la fabrication
     ├── voice/             ✅ enregistrement au micro et encodage mp3 pur JS
+    ├── publish/           ✅ envoi du pack et aperçu de la fiche
     ├── submit/                   dépôt GitHub, release, pull request, suivi
     └── moderate/                 propositions ouvertes, écouter, accepter, refuser
 ```

@@ -3,6 +3,7 @@ import type { Result } from '@domain/errors'
 import type { FileKind, LocalStory, PickedFile } from '@domain/model'
 import type { BuiltPack, PackPlan } from '@domain/pack'
 import type { PackFile } from '@domain/ports'
+import type { Published, PublishRequest } from '@domain/publish'
 
 /**
  * The transport contract: the only surface through which the interface reaches
@@ -43,6 +44,12 @@ export interface Requests {
   'pack:build': { params: { plan: PackPlan; files: PackFile[] }; result: BuiltPack }
   /** Shows the last pack built in the file manager. Takes no path, on purpose. */
   'pack:reveal': { params: void; result: void }
+
+  /**
+   * Publishes the pack in a repository the contributor owns, and rends the entry
+   * that points at it. Progress arrives as an event; every step is resumable.
+   */
+  'publish:pack': { params: PublishRequest; result: Published }
 }
 
 export type Channel = keyof Requests
@@ -61,7 +68,8 @@ export const CHANNELS = [
   'auth:signOut',
   'auth:openVerification',
   'pack:build',
-  'pack:reveal'
+  'pack:reveal',
+  'publish:pack'
 ] as const satisfies readonly Channel[]
 
 /** Events pushed by the main process to the interface. */
@@ -69,10 +77,16 @@ export interface Events {
   'fetch:progress': { url: string; received: number; total: number | null }
   /** The code to type, as soon as GitHub hands it back. */
   'auth:code': DeviceCode
+  /** How far the pack has got in its upload. */
+  'publish:progress': { sent: number; total: number | null }
 }
 
 export type EventChannel = keyof Events
-export const EVENT_CHANNELS = ['fetch:progress', 'auth:code'] as const satisfies readonly EventChannel[]
+export const EVENT_CHANNELS = [
+  'fetch:progress',
+  'auth:code',
+  'publish:progress'
+] as const satisfies readonly EventChannel[]
 
 /** Scheme serving the picked files. See infrastructure/electronFileProtocol.ts. */
 export const FILE_SCHEME = 'telmi-file'

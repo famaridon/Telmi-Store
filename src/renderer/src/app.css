@@ -409,3 +409,20 @@ button.big { padding: 14px 30px; font-size: 17px; }
 .voice audio { height: 32px; max-width: 240px; }
 .voice button { white-space: nowrap; }
 .voice-state { margin: 0; }
+
+/* -------------------------------------------------------------------- publish */
+.publish { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; width: 100%; }
+.publish .hint { margin: 0; }
+.publish-progress { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+
+.jauge { width: 100%; max-width: 460px; height: 8px; background: var(--black-30); border-radius: 999px; overflow: hidden; }
+.jauge > span { display: block; height: 100%; background: var(--orange); border-radius: 999px; transition: width .2s linear; }
+@media (prefers-reduced-motion: reduce) { .jauge > span { transition: none } }
+
+.fiche {
+  width: 100%; margin: 0;
+  background: var(--black-30); border-radius: 14px; padding: 18px 20px;
+  font: 12.5px/1.6 ui-monospace, monospace; color: var(--white-70);
+  overflow-x: auto; max-height: 380px; overflow-y: auto;
+  -webkit-user-select: text; user-select: text;
+}

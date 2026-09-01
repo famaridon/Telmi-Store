@@ -53,7 +53,15 @@ function App(): React.JSX.Element {
         </button>
       </nav>
 
-      <div className="panel">{tab === 'submit' ? <SubmissionScreen /> : <Library />}</div>
+      <div className="panel">
+        {tab === 'submit' ? (
+          <SubmissionScreen
+            login={account.state.step === 'signedIn' ? account.state.identity.login : null}
+          />
+        ) : (
+          <Library />
+        )}
+      </div>
     </main>
   )
 }

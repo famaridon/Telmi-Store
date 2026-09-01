@@ -155,6 +155,37 @@ export const describeError = (error: AppError): ShownError => {
         message: "L'enregistrement n'a pas pu être converti. Réessaie.",
         detail: error.cause
       }
+    case 'github/refused':
+      return {
+        message: `GitHub a refusé une étape de la publication (${error.what}).`,
+        detail: `${error.status} — ${error.body}`
+      }
+    case 'github/unreachable':
+      return {
+        message: 'GitHub ne répond pas. Vérifie ta connexion, puis relance la publication : elle reprendra où elle en était.',
+        detail: error.cause
+      }
+    case 'github/upload-failed':
+      return {
+        message:
+          "L'envoi du pack a été interrompu. Relance la publication : elle remplacera ce qui a " +
+          'déjà été envoyé au lieu de créer un doublon.',
+        detail: error.cause
+      }
+    case 'github/not-public':
+      return {
+        message:
+          "Le pack a été envoyé mais son adresse ne répond pas encore. Attends un instant et " +
+          'relance la vérification.',
+        detail: `${error.status} — ${error.url}`
+      }
+    case 'github/size-mismatch':
+      return {
+        message:
+          "Le pack publié ne fait pas la taille attendue : l'envoi est probablement incomplet. " +
+          'Relance la publication.',
+        detail: `attendu ${error.expected} octets, trouvé ${error.found}`
+      }
     case 'ui/no-window':
       return { message: 'Aucune fenêtre disponible.' }
     case 'ipc/unknown-channel':

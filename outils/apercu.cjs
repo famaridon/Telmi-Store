@@ -57,6 +57,16 @@ app.whenReady().then(async () => {
       document.querySelector('input[name="rights"]')?.click()
       await attendre(400)
       // DEFILER : 'non' reste en haut, un titre de section s'y amene, sinon bas de page
+      // Etapes optionnelles : fabriquer le pack, puis le publier
+      if (${JSON.stringify(process.env.FABRIQUER === 'oui')}) {
+        parTexte('button', 'Fabriquer le pack')?.click()
+        await attendre(900)
+      }
+      if (${JSON.stringify(process.env.PUBLIER === 'oui')}) {
+        parTexte('button', 'Publier le pack')?.click()
+        await attendre(700)
+      }
+
       const ou = ${JSON.stringify(process.env.DEFILER ?? 'bas')}
       if (ou === 'bas') window.scrollTo(0, document.body.scrollHeight)
       else if (ou !== 'non') parTexte('h2', ou)?.scrollIntoView({ block: 'start' })

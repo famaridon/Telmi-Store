@@ -1,5 +1,6 @@
 import type { Submission } from '@domain/model'
 import type { Voices } from '../voice/useVoices'
+import PublishPanel from '../publish/PublishPanel'
 import ErrorBanner from '../presentation/ErrorBanner'
 import { formatBytes } from '../presentation/format'
 import { useBuildPack } from './useBuildPack'
@@ -10,10 +11,12 @@ interface Props {
   uuid: string
   ready: boolean
   voices: Voices
+  /** The signed-in login, or null when nobody is. */
+  login: string | null
 }
 
 /** The last step of the screen: turning the form into a pack. */
-function BuildPanel({ submission, uuid, ready, voices }: Props): React.JSX.Element {
+function BuildPanel({ submission, uuid, ready, voices, login }: Props): React.JSX.Element {
   const build = useBuildPack()
   const { state } = build
 
@@ -73,8 +76,7 @@ function BuildPanel({ submission, uuid, ready, voices }: Props): React.JSX.Eleme
             </div>
           </dl>
           <p className="hint">
-            Tu peux déjà l’installer dans Telmi-Sync pour l’écouter. La publication sur un store
-            est l’étape d’après.
+            Tu peux déjà l’installer dans Telmi-Sync pour l’écouter avant de le publier.
           </p>
           <div className="build-actions">
             <button type="button" onClick={build.reveal}>
@@ -84,6 +86,8 @@ function BuildPanel({ submission, uuid, ready, voices }: Props): React.JSX.Eleme
               fabriquer à nouveau
             </button>
           </div>
+
+          <PublishPanel submission={submission} pack={state.pack} uuid={uuid} login={login} />
         </div>
       )}
     </div>

@@ -39,6 +39,11 @@ export type AppError =
   | { code: 'voice/no-microphone'; cause: string }
   | { code: 'voice/denied' }
   | { code: 'voice/encoding-failed'; cause: string }
+  | { code: 'github/refused'; status: number; what: string; body: string }
+  | { code: 'github/unreachable'; cause: string }
+  | { code: 'github/upload-failed'; cause: string }
+  | { code: 'github/not-public'; url: string; status: number }
+  | { code: 'github/size-mismatch'; expected: number; found: number }
   | { code: 'ui/no-window' }
   | { code: 'ipc/unknown-channel'; channel: string }
   | { code: 'internal/unexpected'; cause: string }
