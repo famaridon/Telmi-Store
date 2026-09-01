@@ -58,7 +58,9 @@ const api = {
     /** Which store a proposal goes to. */
     store: () => invoke('propose:store'),
     /** Opens the last proposal in the browser. Takes no URL, on purpose. */
-    open: () => invoke('propose:open')
+    open: () => invoke('propose:open'),
+    /** The contributor's own proposals, with what was said on them. */
+    mine: () => invoke('propose:mine')
   },
 
   packs: {

@@ -28,6 +28,10 @@ interface Fake {
   forkPolls: number
   branchExists: boolean
   pullAlreadyOpen: boolean
+  /** What GET /pulls?state=all rends, for the « mine » tests. */
+  allPulls: unknown[]
+  reviews: Record<number, unknown[]>
+  comments: Record<number, unknown[]>
 }
 
 let fake: Fake
@@ -71,6 +75,14 @@ const handler = (request: IncomingMessage, response: ServerResponse): void => {
       return send(200, {})
     }
 
+    if (path === `/repos/${STORE}/pulls?state=all&per_page=100`) return send(200, fake.allPulls)
+
+    const relecture = path.match(/^\/repos\/.+\/pulls\/(\d+)\/reviews$/)
+    if (relecture) return send(200, fake.reviews[Number(relecture[1])] ?? [])
+
+    const commentaires = path.match(/^\/repos\/.+\/issues\/(\d+)\/comments$/)
+    if (commentaires) return send(200, fake.comments[Number(commentaires[1])] ?? [])
+
     if (path.startsWith(`/repos/${STORE}/pulls?`)) {
       return send(200, fake.pullAlreadyOpen ? [{ html_url: 'https://github.com/pr/7', number: 7 }] : [])
     }
@@ -93,7 +105,10 @@ beforeEach(async () => {
     forkAppearsAfter: 0,
     forkPolls: 0,
     branchExists: false,
-    pullAlreadyOpen: false
+    pullAlreadyOpen: false,
+    allPulls: [],
+    reviews: {},
+    comments: {}
   }
 })
 
@@ -239,6 +254,90 @@ describe('propose — a store that is not there', () => {
       ...request,
       storeRepo: 'personne/nulle-part'
     })
+    expect(answer.ok).toBe(false)
+    if (!answer.ok) expect(answer.error.code).toBe('propose/store-unreachable')
+  })
+})
+
+describe('mine — following one’s own proposals', () => {
+  const brut = (over: Record<string, unknown> = {}): Record<string, unknown> => ({
+    number: 3,
+    html_url: 'https://github.com/pr/3',
+    title: 'Le Loup (3+)',
+    state: 'open',
+    merged_at: null,
+    updated_at: '2026-09-01T10:00:00Z',
+    head: { ref: 'proposition/le-loup' },
+    user: { login: 'contributeur' },
+    ...over
+  })
+
+  const mine = () => createGitHubPulls(fake.base, 1).mine('gho_x', STORE)
+
+  it('keeps only the contributor’s own proposals', async () => {
+    fake.allPulls = [brut(), brut({ number: 9, user: { login: 'quelqu-un-d-autre' } })]
+    const answer = await mine()
+    expect(answer.ok).toBe(true)
+    if (!answer.ok) return
+    expect(answer.value.map((p) => p.number)).toEqual([3])
+  })
+
+  it('reads the story out of the branch', async () => {
+    fake.allPulls = [brut()]
+    const answer = await mine()
+    if (!answer.ok) return
+    expect(answer.value[0]?.slug).toBe('le-loup')
+  })
+
+  it('merges what was said in reviews and in plain comments', async () => {
+    fake.allPulls = [brut()]
+    fake.reviews[3] = [
+      { state: 'CHANGES_REQUESTED', body: 'Les droits ne sont pas clairs.', submitted_at: '2026-09-02T09:00:00Z', user: { login: 'moderateur' } }
+    ]
+    fake.comments[3] = [
+      { body: 'Merci pour la proposition !', created_at: '2026-09-01T11:00:00Z', user: { login: 'moderateur' } }
+    ]
+    const answer = await mine()
+    if (!answer.ok) return
+    const proposal = answer.value[0]!
+    expect(proposal.state).toBe('changes-requested')
+    // Oldest first, whichever kind it was.
+    expect(proposal.comments.map((c) => c.body)).toEqual([
+      'Merci pour la proposition !',
+      'Les droits ne sont pas clairs.'
+    ])
+  })
+
+  it('ignores an empty review body rather than showing a blank message', async () => {
+    fake.allPulls = [brut()]
+    fake.reviews[3] = [{ state: 'APPROVED', body: '', submitted_at: '2026-09-02T09:00:00Z', user: { login: 'm' } }]
+    const answer = await mine()
+    if (!answer.ok) return
+    expect(answer.value[0]?.comments).toEqual([])
+  })
+
+  it('reads a merged proposal as accepted', async () => {
+    fake.allPulls = [brut({ state: 'closed', merged_at: '2026-09-03T10:00:00Z' })]
+    const answer = await mine()
+    if (!answer.ok) return
+    expect(answer.value[0]?.state).toBe('accepted')
+  })
+
+  it('reads a closed proposal that was never merged as refused', async () => {
+    fake.allPulls = [brut({ state: 'closed', merged_at: null })]
+    const answer = await mine()
+    if (!answer.ok) return
+    expect(answer.value[0]?.state).toBe('declined')
+  })
+
+  it('rends an empty list rather than a failure when nothing was proposed', async () => {
+    fake.allPulls = []
+    const answer = await mine()
+    expect(answer).toEqual({ ok: true, value: [] })
+  })
+
+  it('says the store is unreachable rather than rending nothing', async () => {
+    const answer = await createGitHubPulls(fake.base, 1).mine('gho_x', 'personne/nulle-part')
     expect(answer.ok).toBe(false)
     if (!answer.ok) expect(answer.error.code).toBe('propose/store-unreachable')
   })

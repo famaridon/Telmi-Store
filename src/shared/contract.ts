@@ -5,6 +5,7 @@ import type { BuiltPack, PackPlan } from '@domain/pack'
 import type { PackFile } from '@domain/ports'
 import type { Published, PublishRequest } from '@domain/publish'
 import type { Proposed, ProposeRequest } from '@domain/propose'
+import type { Proposal } from '@domain/proposals'
 
 /**
  * The transport contract: the only surface through which the interface reaches
@@ -64,6 +65,8 @@ export interface Requests {
    * opening channel: the interface never names an address to visit.
    */
   'propose:open': { params: void; result: void }
+  /** The contributor's own proposals, with what a moderator said on them. */
+  'propose:mine': { params: void; result: Proposal[] }
 }
 
 export type Channel = keyof Requests
@@ -86,7 +89,8 @@ export const CHANNELS = [
   'publish:pack',
   'propose:entry',
   'propose:store',
-  'propose:open'
+  'propose:open',
+  'propose:mine'
 ] as const satisfies readonly Channel[]
 
 /** Events pushed by the main process to the interface. */

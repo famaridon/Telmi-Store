@@ -2,6 +2,7 @@ import type { DeviceCode, Identity, PollOutcome } from './auth'
 import type { AppError, Result } from './errors'
 import type { FileKind, LocalStory, PickedFile } from './model'
 import type { BuiltPack, PackPlan } from './pack'
+import type { Proposal } from './proposals'
 import type { Proposed, ProposeRequest } from './propose'
 
 /**
@@ -95,6 +96,8 @@ export interface GitHubRepos {
  */
 export interface GitHubPulls {
   propose(token: string, request: ProposeRequest): Promise<Result<Proposed>>
+  /** The contributor's own proposals to that store, with what was said on them. */
+  mine(token: string, storeRepo: string): Promise<Result<Proposal[]>>
 }
 
 /** Where the token sleeps between two sessions. Never in the renderer. */

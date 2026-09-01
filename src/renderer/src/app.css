@@ -426,3 +426,25 @@ button.big { padding: 14px 30px; font-size: 17px; }
   overflow-x: auto; max-height: 380px; overflow-y: auto;
   -webkit-user-select: text; user-select: text;
 }
+
+/* ------------------------------------------------------------------ proposals */
+.proposals { display: flex; flex-direction: column; gap: 14px; margin: 0; }
+.proposal { background: var(--white-10); border-radius: var(--radius); padding: 18px 22px; }
+.proposal .hint { margin: 0 0 10px; }
+.proposal .hint:last-child { margin-bottom: 0; }
+.proposal-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 10px; }
+.proposal-title { flex: 1 1 200px; color: var(--ink); font-size: 15px; }
+
+.badge-etat {
+  font: 700 12px/1 exo, sans-serif; letter-spacing: .03em;
+  padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+}
+.badge-etat.attente { background: var(--white-15); color: var(--white-70); }
+.badge-etat.alerte { background: var(--yellow); color: #250a41; }
+.badge-etat.ok { background: var(--green); color: #1a2a00; }
+.badge-etat.refus { background: var(--pink); color: #2a0016; }
+
+.proposal-comments { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; }
+.proposal-comments > li { background: var(--black-20); border-radius: 12px; padding: 12px 16px; }
+.proposal-comments > li > span { margin-right: 10px; }
+.proposal-comments p { margin: 6px 0 0; font-size: 14px; color: var(--white-70); white-space: pre-wrap; }

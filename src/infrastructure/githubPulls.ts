@@ -1,7 +1,9 @@
 import { causeOf, fail, ok, type Result } from '@domain/errors'
 import type { GitHubPulls } from '@domain/ports'
+import type { Proposal, ProposalComment, RawPull } from '@domain/proposals'
 import type { Proposed, ProposeRequest } from '@domain/propose'
 import { proposalBranch, proposalCommitMessage } from '@domain/rules/entry'
+import { sortProposals, toProposal } from '@domain/rules/proposals'
 
 /**
  * Opening a pull request without ever cloning anything.
@@ -83,12 +85,56 @@ interface ShaBody {
 interface PullBody {
   html_url?: string
   number?: number
+  title?: string
+  state?: string
+  merged_at?: string | null
+  updated_at?: string
+  head?: { ref?: string }
+  user?: { login?: string }
+}
+
+interface ReviewBody {
+  state?: string
+  body?: string
+  submitted_at?: string
+  user?: { login?: string }
+}
+
+interface CommentBody {
+  body?: string
+  created_at?: string
+  user?: { login?: string }
+}
+
+/** GitHub shouts its review states; we speak of them plainly. */
+const lastReviewOf = (reviews: ReviewBody[]): RawPull['lastReview'] => {
+  // Only the states that carry a decision count; « pending » and « dismissed »
+  // say nothing about what the moderator wants.
+  const decisive = reviews.filter((review) =>
+    ['APPROVED', 'CHANGES_REQUESTED', 'COMMENTED'].includes(review.state ?? '')
+  )
+  const last = decisive[decisive.length - 1]
+  switch (last?.state) {
+    case 'APPROVED':
+      return 'approved'
+    case 'CHANGES_REQUESTED':
+      return 'changes-requested'
+    case 'COMMENTED':
+      return 'commented'
+    default:
+      return null
+  }
 }
 
 /**
  * `api` and `forkWaitMs` are injectable so the six-call sequence — the risky part
  * of this adapter — can be exercised against a fake GitHub without waiting.
  */
+const commentOf = (author: string | undefined, body: string | undefined, at: string | undefined): ProposalComment | null =>
+  body === undefined || body.trim() === ''
+    ? null
+    : { author: author ?? 'inconnu', body: body.trim(), at: at ?? '' }
+
 export const createGitHubPulls = (
   api = 'https://api.github.com',
   forkWaitMs = 1_500
@@ -283,5 +329,80 @@ export const createGitHubPulls = (
     }
 
     return ok({ url: pull.value.html_url, number: pull.value.number, branch, fork, updated: false })
+  }
+,
+
+  async mine(token: string, storeRepo: string): Promise<Result<Proposal[]>> {
+    const me = await call<{ login?: string }>({ api, token, method: 'GET', path: '/user', what: 'compte' })
+    if (!me.ok) return me
+    const login = me.value?.login
+    if (login === undefined) {
+      return fail({ code: 'github/refused', status: 200, what: 'compte', body: 'reponse sans login' })
+    }
+
+    const pulls = await call<PullBody[]>({
+      api,
+      token,
+      method: 'GET',
+      // A community store holds a handful of proposals: listing and filtering
+      // costs one call, where the search API would cost a rate limit.
+      path: `/repos/${storeRepo}/pulls?state=all&per_page=100`,
+      what: 'propositions'
+    })
+    if (!pulls.ok) return pulls
+    if (pulls.value === null) return fail({ code: 'propose/store-unreachable', repo: storeRepo })
+
+    const mine = pulls.value.filter((pull) => pull.user?.login === login)
+    const proposals: Proposal[] = []
+
+    for (const pull of mine) {
+      if (pull.number === undefined || pull.html_url === undefined) continue
+
+      const reviews = await call<ReviewBody[]>({
+        api,
+        token,
+        method: 'GET',
+        path: `/repos/${storeRepo}/pulls/${pull.number}/reviews`,
+        what: 'relectures'
+      })
+      if (!reviews.ok) return reviews
+
+      const comments = await call<CommentBody[]>({
+        api,
+        token,
+        method: 'GET',
+        path: `/repos/${storeRepo}/issues/${pull.number}/comments`,
+        what: 'commentaires'
+      })
+      if (!comments.ok) return comments
+
+      // A refusal may arrive as a review, as a plain comment, or as both: the
+      // contributor needs to read whichever it was.
+      const said: ProposalComment[] = []
+      for (const review of reviews.value ?? []) {
+        const said1 = commentOf(review.user?.login, review.body, review.submitted_at)
+        if (said1 !== null) said.push(said1)
+      }
+      for (const comment of comments.value ?? []) {
+        const said2 = commentOf(comment.user?.login, comment.body, comment.created_at)
+        if (said2 !== null) said.push(said2)
+      }
+
+      const raw: RawPull = {
+        number: pull.number,
+        url: pull.html_url,
+        title: pull.title ?? '',
+        branch: pull.head?.ref ?? '',
+        author: login,
+        closed: pull.state === 'closed',
+        merged: pull.merged_at !== null && pull.merged_at !== undefined,
+        at: pull.updated_at ?? '',
+        lastReview: lastReviewOf(reviews.value ?? []),
+        comments: said
+      }
+      proposals.push(toProposal(raw, storeRepo))
+    }
+
+    return ok(sortProposals(proposals))
   }
 })

@@ -42,6 +42,14 @@ app.whenReady().then(async () => {
         element.dispatchEvent(new Event('input', { bubbles: true }))
       }
 
+      // ONGLET : bascule avant tout le reste
+      const onglet = ${JSON.stringify(process.env.ONGLET ?? '')}
+      if (onglet !== '') {
+        parTexte('button', onglet)?.click()
+        await attendre(600)
+        return
+      }
+
       parTexte('button', 'Parcourir')?.click()
       await attendre(300)
       parTexte('button', 'Choisir une image')?.click()

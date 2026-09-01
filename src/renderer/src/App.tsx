@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import SubmissionScreen from './submission/SubmissionScreen'
 import Library from './Library'
+import ProposalsScreen from './proposals/ProposalsScreen'
 import AccountPanel from './account/AccountPanel'
 import Onboarding from './account/Onboarding'
 import { useAccount } from './account/useAccount'
 
-type Tab = 'submit' | 'library'
+type Tab = 'submit' | 'proposals' | 'library'
 
 function App(): React.JSX.Element {
   const account = useAccount()
@@ -15,6 +16,8 @@ function App(): React.JSX.Element {
    * submission can be prepared without an account, only publishing needs one.
    */
   const [exploring, setExploring] = useState(false)
+
+  const login = account.state.step === 'signedIn' ? account.state.identity.login : null
 
   // Restoring a kept token takes a moment; showing the onboarding meanwhile
   // would make it flash for someone who is in fact already signed in.
@@ -48,19 +51,22 @@ function App(): React.JSX.Element {
         <button type="button" className={tab === 'submit' ? 'selected' : ''} onClick={() => setTab('submit')}>
           Déposer une histoire
         </button>
+        <button
+          type="button"
+          className={tab === 'proposals' ? 'selected' : ''}
+          onClick={() => setTab('proposals')}
+        >
+          Mes propositions
+        </button>
         <button type="button" className={tab === 'library' ? 'selected' : ''} onClick={() => setTab('library')}>
           Ma bibliothèque
         </button>
       </nav>
 
       <div className="panel">
-        {tab === 'submit' ? (
-          <SubmissionScreen
-            login={account.state.step === 'signedIn' ? account.state.identity.login : null}
-          />
-        ) : (
-          <Library />
-        )}
+        {tab === 'submit' && <SubmissionScreen login={login} />}
+        {tab === 'proposals' && <ProposalsScreen login={login} />}
+        {tab === 'library' && <Library />}
       </div>
     </main>
   )

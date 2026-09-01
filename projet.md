@@ -300,16 +300,24 @@ il manque l'essai réel, qui crée un dépôt et une pull request visibles.
 
 ---
 
-## Lot 7 — Suivre sa proposition
+## Lot 7 — Suivre sa proposition ✅
 
-**Taille : S.** Dépend de : lot 6.
+**Livré.** Dépend de : lot 6.
 
-- [ ] Lister les pull requests ouvertes par l'utilisateur sur les stores connus
-- [ ] Afficher l'état — en relecture, acceptée, refusée — avec les commentaires reçus
-- [ ] Rouvrir le formulaire pour corriger et repousser sur la même branche
+- [x] Lister les pull requests ouvertes par l'utilisateur sur les stores connus
+- [x] Afficher l'état — en relecture, acceptée, refusée — avec les commentaires reçus
+- [x] Corriger et repousser sur la même branche — la proposition est mise à jour
 
-**Critère d'acceptation.** Refuser une PR de test avec un commentaire : l'application
-l'affiche comme refusée et montre le commentaire, sans que l'utilisateur ouvre GitHub.
+**Sur le troisième point.** « Rouvrir le formulaire » ne peut pas restaurer les mp3
+déposés — ils ne survivent pas à la session. Mais l'idempotence du lot 6 rend la
+correction gratuite : même titre → même slug → même branche → **la proposition est mise à
+jour, pas dupliquée**. Le travail était donc de le *dire*, et l'écran le dit à l'endroit
+exact où on le demande.
+
+⏳ **Critère d'acceptation restant** : refuser une vraie proposition avec un commentaire et
+voir l'application l'afficher comme refusée. La traduction des états est couverte par les
+tests, et l'adaptateur tourne contre un faux GitHub — mais aucune vraie proposition n'a
+encore été refusée.
 
 ---
 

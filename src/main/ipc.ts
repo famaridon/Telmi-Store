@@ -7,6 +7,7 @@ import { restoreSession, signIn, signOut } from '@app/signIn'
 import { buildPack } from '@app/buildPack'
 import { publishPack } from '@app/publishPack'
 import { proposeEntry } from '@app/proposeEntry'
+import { listProposals } from '@app/listProposals'
 import { DEFAULT_STORE_REPO } from '@infra/config'
 import type { Answer, Channel, Params } from '@shared/contract'
 import { CHANNELS } from '@shared/contract'
@@ -104,6 +105,7 @@ export const registerIpc = (ports: Ports): void => {
   })
 
   handle('propose:store', async () => ok(DEFAULT_STORE_REPO))
+  handle('propose:mine', () => listProposals(ports, DEFAULT_STORE_REPO))
 
   handle('propose:open', async () => {
     if (lastProposal === null) return fail({ code: 'propose/store-unreachable', repo: 'aucune proposition' })

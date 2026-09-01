@@ -64,7 +64,38 @@ contextBridge.exposeInMainWorld('telmi', {
         updated: false
       }
     }),
-    open: async () => ({ ok: true, value: undefined })
+    open: async () => ({ ok: true, value: undefined }),
+    mine: async () => ({
+      ok: true,
+      value: [
+        {
+          number: 14, url: '#', title: 'Le sorcier Noé et les animaux (5+)',
+          storeRepo: 'famaridon/telmi-store-dev', slug: 'le-sorcier-noe',
+          state: 'changes-requested', at: '2026-09-01T10:00:00Z',
+          comments: [
+            { author: 'dantsu', body: 'Merci ! Deux choses avant de publier.', at: '2026-09-01T09:00:00Z' },
+            { author: 'dantsu', body: 'La source des droits pointe vers une page qui n’existe plus, et la piste 3 sature un peu. Tu peux corriger et reproposer ?', at: '2026-09-01T10:00:00Z' }
+          ]
+        },
+        {
+          number: 12, url: '#', title: 'Les contes de la mère Pauline (7+)',
+          storeRepo: 'famaridon/telmi-store-dev', slug: 'les-contes-de-la-mere-pauline',
+          state: 'under-review', at: '2026-08-30T14:00:00Z', comments: []
+        },
+        {
+          number: 9, url: '#', title: 'Cache-cache (3+)',
+          storeRepo: 'famaridon/telmi-store-dev', slug: 'cache-cache',
+          state: 'accepted', at: '2026-08-21T08:00:00Z',
+          comments: [{ author: 'dantsu', body: 'Parfait, mes enfants l’ont reclamee trois fois. Merci !', at: '2026-08-21T08:00:00Z' }]
+        },
+        {
+          number: 6, url: '#', title: 'Comptines du matin (3+)',
+          storeRepo: 'famaridon/telmi-store-dev', slug: 'comptines-du-matin',
+          state: 'declined', at: '2026-08-12T16:00:00Z',
+          comments: [{ author: 'dantsu', body: 'Ces comptines sont sous droits chez leur editeur : je ne peux pas les publier ici.', at: '2026-08-12T16:00:00Z' }]
+        }
+      ]
+    })
   },
 
   publish: {
