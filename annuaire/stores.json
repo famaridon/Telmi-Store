@@ -1,0 +1,23 @@
+{
+  "_lisez_moi": [
+    "L'annuaire des stores Telmi, lu par Telmi Store au demarrage.",
+    "",
+    "Ajouter un store = une pull request sur ce fichier. Pas de nouvelle version",
+    "de l'application : c'est tout l'interet, puisque les stores anglais et chinois",
+    "ont vecu un an sans qu'aucun utilisateur ne les voie, leur URL etant enfouie",
+    "dans une page de wiki.",
+    "",
+    "depot      obligatoire, « proprietaire/nom » du depot du store",
+    "nom        ce qui s'affiche",
+    "langue     code a deux lettres, pour le regroupement",
+    "index      facultatif ; par defaut index.json a la racine, branche main"
+  ],
+  "stores": [
+    {
+      "depot": "famaridon/telmi-store-dev",
+      "nom": "Store Dev",
+      "langue": "fr",
+      "description": "Banc d'essai technique. Sert a verifier qu'un depot git nu est consomme tel quel par Telmi-Sync."
+    }
+  ]
+}

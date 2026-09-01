@@ -363,15 +363,21 @@ comptes, et un refus argumenté aussi rapide qu'une acceptation.
 
 ---
 
-## Lot 9 — Annuaire de stores
+## Lot 9 — Annuaire de stores ✅
 
-**Taille : S.** Dépend de : rien. Utile dès le lot 6.
+**Livré.** Dépend de : rien.
 
-- [ ] Charger un `stores.json` distant : nom, langue, description, URL, dépôt
-- [ ] Écran « Découvrir », ajout en un clic, mémorisation des choix
+- [x] Charger un `stores.json` distant : nom, langue, description, URL, dépôt
+- [x] Écran « Découvrir », ajout en un clic, mémorisation des choix
 
-**Critère d'acceptation.** Ajouter une entrée dans l'annuaire distant, sans publier de
-nouvelle version de l'application : elle apparaît au démarrage suivant.
+**Critère d'acceptation ✅ par construction.** L'annuaire est lu depuis
+`annuaire/stores.json` de ce dépôt, à chaque démarrage. Ajouter un store est une
+proposition d'une ligne sur ce fichier, et il apparaît chez tout le monde **sans nouvelle
+version de l'application** — c'est exactement ce que la constante précédente empêchait.
+
+Le store choisi est mémorisé et **gouverne réellement les autres écrans** : proposer et
+modérer agissent sur lui, résolu à chaque appel plutôt que figé. Hors ligne, on retombe sur
+un store connu au lieu de tout refuser.
 
 **Pourquoi ça compte.** Les stores anglais et chinois existent depuis un an et **aucun
 utilisateur ne les a jamais vus**, parce qu'il faut fouiller le wiki pour trouver leur URL.

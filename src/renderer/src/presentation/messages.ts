@@ -222,6 +222,21 @@ export const describeError = (error: AppError): ShownError => {
       return {
         message: "Ce pack ne contient aucune piste jouable. Il n'a rien à faire dans un store.",
       }
+    case 'directory/unreachable':
+      return {
+        message:
+          "L'annuaire des stores est injoignable. L'application continue avec le store connu, " +
+          'mais tu ne verras pas les autres.',
+        detail: `${error.url} — ${error.cause}`
+      }
+    case 'directory/empty':
+      return { message: 'L’annuaire des stores ne contient aucune entrée valide.', detail: error.url }
+    case 'preferences/unwritable':
+      return {
+        message:
+          "Ton choix de store n'a pas pu être enregistré : il tiendra le temps de cette session.",
+        detail: error.cause
+      }
     case 'ui/no-window':
       return { message: 'Aucune fenêtre disponible.' }
     case 'ipc/unknown-channel':

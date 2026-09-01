@@ -392,6 +392,7 @@ src/
 │   ├── propose.ts            ✅ ce qu'une proposition porte, et ce qu'elle rend
 │   ├── proposals.ts          ✅ l'état d'une proposition, vu du contributeur
 │   ├── moderation.ts         ✅ ce qu'un modérateur voit, et les motifs de refus
+│   ├── directory.ts          ✅ l'annuaire des stores, et celui qui est visé
 │   └── rules/
 │       ├── submission.ts      ✅ reviewSubmission : ce qui bloque, ce qui avertit
 │       ├── files.ts           ✅ extensions, types MIME, nom d'un téléchargement
@@ -399,6 +400,7 @@ src/
 │       ├── entry.ts           ✅ la fiche, et son passage en français
 │       ├── proposals.ts       ✅ lire une pull request comme un contributeur
 │       ├── moderation.ts      ✅ relire une fiche, reconstituer l'ordre des pistes
+│       └── directory.ts       ✅ lire l'annuaire, tolérer ses fautes de frappe
 │       └── imageLayout.ts     ✅ découpe du texte et cadrage, sans canvas
 ├── application/
 │   └── usecases.ts            ✅ listLibrary, pickFiles, admitPaths, fetchFromUrl
@@ -440,6 +442,7 @@ src/
     ├── propose/           ✅ la proposition, et la prose que le modérateur lit
     ├── proposals/         ✅ suivre ses propositions, sans ouvrir GitHub
     ├── moderation/        ✅ écouter, accepter, refuser — motifs pré-écrits
+    ├── stores/            ✅ découvrir les stores et en choisir un
     ├── submit/                   dépôt GitHub, release, pull request, suivi
     └── moderate/                 propositions ouvertes, écouter, accepter, refuser
 ```

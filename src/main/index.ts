@@ -14,7 +14,9 @@ import { createZipPackReader } from '@infra/zipPackReader'
 import { createElectronTokenStore } from '@infra/electronTokenStore'
 import { createElectronShell } from '@infra/electronShell'
 import { createZipPackWriter } from '@infra/zipPackWriter'
-import { GITHUB_CLIENT_ID } from '@infra/config'
+import { createHttpStoreDirectory } from '@infra/httpStoreDirectory'
+import { createFilePreferences } from '@infra/filePreferences'
+import { GITHUB_CLIENT_ID, STORE_DIRECTORY_URL } from '@infra/config'
 import { registerIpc, unregisterIpc } from './ipc'
 
 /**
@@ -35,6 +37,8 @@ const wire = (): Ports => {
     repos: createGitHubRepos(),
     pulls: createGitHubPulls(),
     moderation: createGitHubModeration(),
+    directory: createHttpStoreDirectory(STORE_DIRECTORY_URL),
+    preferences: createFilePreferences(),
     packReader: createZipPackReader(vault),
     tokens: createElectronTokenStore(),
     shell: createElectronShell(),

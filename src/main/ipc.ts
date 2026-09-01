@@ -9,7 +9,8 @@ import { publishPack } from '@app/publishPack'
 import { proposeEntry } from '@app/proposeEntry'
 import { listProposals } from '@app/listProposals'
 import { acceptProposal, awaitingAnswer, declineProposal, listenTo, mayModerate } from '@app/moderate'
-import { DEFAULT_STORE_REPO } from '@infra/config'
+import { chooseStore, currentStore, knownStores } from '@app/stores'
+import { FALLBACK_STORE_REPO } from '@infra/config'
 import type { Answer, Channel, Params } from '@shared/contract'
 import { CHANNELS } from '@shared/contract'
 
@@ -26,6 +27,18 @@ const handle = <C extends Channel>(channel: C, work: (params: Params<C>) => Prom
       return fail({ code: 'internal/unexpected', cause: causeOf(e) })
     }
   })
+}
+
+/**
+ * The store every proposal and every moderation acts on.
+ *
+ * Resolved at each call from the directory and the remembered choice, so the
+ * store-picking screen actually governs the other screens. Falls back to one
+ * known store rather than refusing everything when offline.
+ */
+const storeOf = async (ports: Ports): Promise<string> => {
+  const current = await currentStore(ports)
+  return current.ok ? current.value : FALLBACK_STORE_REPO
 }
 
 /** The current window, resolved at call time: handlers register only once. */
@@ -105,14 +118,17 @@ export const registerIpc = (ports: Ports): void => {
     return proposed
   })
 
-  handle('propose:store', async () => ok(DEFAULT_STORE_REPO))
-  handle('propose:mine', () => listProposals(ports, DEFAULT_STORE_REPO))
+  handle('propose:store', async () => ok(await storeOf(ports)))
+  handle('propose:mine', async () => listProposals(ports, await storeOf(ports)))
 
-  handle('moderate:allowed', () => mayModerate(ports, DEFAULT_STORE_REPO))
-  handle('moderate:awaiting', () => awaitingAnswer(ports, DEFAULT_STORE_REPO))
+  handle('stores:known', () => knownStores(ports))
+  handle('stores:choose', ({ repo }) => chooseStore(ports, repo))
+
+  handle('moderate:allowed', async () => mayModerate(ports, await storeOf(ports)))
+  handle('moderate:awaiting', async () => awaitingAnswer(ports, await storeOf(ports)))
   handle('moderate:listen', ({ proposal }) => listenTo(ports, proposal))
-  handle('moderate:accept', ({ number, comment }) => acceptProposal(ports, DEFAULT_STORE_REPO, number, comment))
-  handle('moderate:decline', ({ number, comment }) => declineProposal(ports, DEFAULT_STORE_REPO, number, comment))
+  handle('moderate:accept', async ({ number, comment }) => acceptProposal(ports, await storeOf(ports), number, comment))
+  handle('moderate:decline', async ({ number, comment }) => declineProposal(ports, await storeOf(ports), number, comment))
 
   handle('propose:open', async () => {
     if (lastProposal === null) return fail({ code: 'propose/store-unreachable', repo: 'aucune proposition' })

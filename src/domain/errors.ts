@@ -50,6 +50,9 @@ export type AppError =
   | { code: 'pack/checksum-mismatch'; expected: string; found: string }
   | { code: 'pack/unreadable-archive'; cause: string }
   | { code: 'pack/no-chapter' }
+  | { code: 'directory/unreachable'; url: string; cause: string }
+  | { code: 'directory/empty'; url: string }
+  | { code: 'preferences/unwritable'; cause: string }
   | { code: 'ui/no-window' }
   | { code: 'ipc/unknown-channel'; channel: string }
   | { code: 'internal/unexpected'; cause: string }

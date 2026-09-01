@@ -17,10 +17,19 @@ export const GITHUB_CLIENT_ID =
   process.env['TELMI_STORE_GITHUB_CLIENT_ID'] ?? 'Ov23likVrp9mwsOFlqtu'
 
 /**
- * The store a proposal goes to.
+ * Where the directory of stores is read from.
  *
- * A single one for now. The directory of stores is a later stage; until then the
- * interface shows this name so nobody proposes into the wrong repository by
- * accident.
+ * A file, not a constant: adding a store must cost one pull request on it rather
+ * than a new release of this application.
  */
-export const DEFAULT_STORE_REPO = process.env['TELMI_STORE_REPO'] ?? 'famaridon/telmi-store-dev'
+export const STORE_DIRECTORY_URL =
+  process.env['TELMI_STORE_DIRECTORY'] ??
+  'https://raw.githubusercontent.com/famaridon/Telmi-Store/main/annuaire/stores.json'
+
+/**
+ * The store aimed at when the directory cannot be reached at all.
+ *
+ * Offline, or a directory that moved: better to keep working against one known
+ * store than to refuse everything.
+ */
+export const FALLBACK_STORE_REPO = 'famaridon/telmi-store-dev'

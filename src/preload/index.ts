@@ -64,6 +64,12 @@ const api = {
     mine: () => invoke('propose:mine')
   },
 
+  stores: {
+    /** The directory, and which store is aimed at. */
+    known: () => invoke('stores:known'),
+    choose: (repo: string) => invoke('stores:choose', { repo })
+  },
+
   moderate: {
     allowed: () => invoke('moderate:allowed'),
     awaiting: () => invoke('moderate:awaiting'),

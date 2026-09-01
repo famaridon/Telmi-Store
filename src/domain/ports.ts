@@ -2,6 +2,7 @@ import type { DeviceCode, Identity, PollOutcome } from './auth'
 import type { AppError, Result } from './errors'
 import type { FileKind, LocalStory, PickedFile } from './model'
 import type { BuiltPack, PackPlan } from './pack'
+import type { StoreListing } from './directory'
 import type { Awaiting, PlayablePack } from './moderation'
 import type { Proposal } from './proposals'
 import type { Proposed, ProposeRequest } from './propose'
@@ -131,6 +132,22 @@ export interface PackReader {
   open(url: string, expectedSha256: string): Promise<Result<PlayablePack>>
 }
 
+/** The directory of known stores, fetched rather than compiled in. */
+export interface StoreDirectory {
+  list(): Promise<Result<StoreListing[]>>
+}
+
+/**
+ * The few choices worth remembering between two runs.
+ *
+ * Small and few on purpose: which store a contributor proposes to, and nothing
+ * that would matter if the file were lost.
+ */
+export interface Preferences {
+  chosenStore(): Promise<string | null>
+  chooseStore(repo: string): Promise<Result<void>>
+}
+
 /** Where the token sleeps between two sessions. Never in the renderer. */
 export interface TokenStore {
   read(): Promise<Result<string | null>>
@@ -179,6 +196,8 @@ export interface Ports {
   repos: GitHubRepos
   pulls: GitHubPulls
   moderation: GitHubModeration
+  directory: StoreDirectory
+  preferences: Preferences
   packReader: PackReader
   tokens: TokenStore
   shell: Shell
