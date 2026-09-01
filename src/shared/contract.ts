@@ -4,6 +4,7 @@ import type { FileKind, LocalStory, PickedFile } from '@domain/model'
 import type { BuiltPack, PackPlan } from '@domain/pack'
 import type { PackFile } from '@domain/ports'
 import type { Published, PublishRequest } from '@domain/publish'
+import type { Proposed, ProposeRequest } from '@domain/propose'
 
 /**
  * The transport contract: the only surface through which the interface reaches
@@ -50,6 +51,19 @@ export interface Requests {
    * that points at it. Progress arrives as an event; every step is resumable.
    */
   'publish:pack': { params: PublishRequest; result: Published }
+  /**
+   * Opens — or updates — the pull request that proposes the entry to a store.
+   * No repository is cloned: two small files on a branch of the contributor's
+   * own fork.
+   */
+  'propose:entry': { params: ProposeRequest; result: Proposed }
+  /** The store a proposal goes to, decided by the application, not the interface. */
+  'propose:store': { params: void; result: string }
+  /**
+   * Opens the last proposal in the browser. Takes no URL, like every other
+   * opening channel: the interface never names an address to visit.
+   */
+  'propose:open': { params: void; result: void }
 }
 
 export type Channel = keyof Requests
@@ -69,7 +83,10 @@ export const CHANNELS = [
   'auth:openVerification',
   'pack:build',
   'pack:reveal',
-  'publish:pack'
+  'publish:pack',
+  'propose:entry',
+  'propose:store',
+  'propose:open'
 ] as const satisfies readonly Channel[]
 
 /** Events pushed by the main process to the interface. */

@@ -66,6 +66,10 @@ app.whenReady().then(async () => {
         parTexte('button', 'Publier le pack')?.click()
         await attendre(700)
       }
+      if (${JSON.stringify(process.env.PROPOSER === 'oui')}) {
+        parTexte('button', 'Proposer au store')?.click()
+        await attendre(700)
+      }
 
       const ou = ${JSON.stringify(process.env.DEFILER ?? 'bas')}
       if (ou === 'bas') window.scrollTo(0, document.body.scrollHeight)

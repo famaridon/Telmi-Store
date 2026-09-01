@@ -2,6 +2,7 @@ import type { DeviceCode, Identity, PollOutcome } from './auth'
 import type { AppError, Result } from './errors'
 import type { FileKind, LocalStory, PickedFile } from './model'
 import type { BuiltPack, PackPlan } from './pack'
+import type { Proposed, ProposeRequest } from './propose'
 
 /**
  * What the application needs from the outside world, expressed as interfaces it
@@ -84,6 +85,18 @@ export interface GitHubRepos {
   checkPublic(url: string, expectedBytes: number): Promise<Result<void>>
 }
 
+/**
+ * Proposing an entry to a store, through a pull request.
+ *
+ * No repository is ever cloned: six REST calls put two small files on a branch
+ * of the contributor's own fork, and open the proposal. Idempotent like the
+ * publication — correcting a proposal updates the branch and the existing pull
+ * request rather than opening a second one.
+ */
+export interface GitHubPulls {
+  propose(token: string, request: ProposeRequest): Promise<Result<Proposed>>
+}
+
 /** Where the token sleeps between two sessions. Never in the renderer. */
 export interface TokenStore {
   read(): Promise<Result<string | null>>
@@ -130,6 +143,7 @@ export interface Ports {
   fetcher: Fetcher
   auth: GitHubAuth
   repos: GitHubRepos
+  pulls: GitHubPulls
   tokens: TokenStore
   shell: Shell
   packs: PackWriter

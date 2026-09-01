@@ -52,6 +52,21 @@ contextBridge.exposeInMainWorld('telmi', {
     reveal: async () => ({ ok: true, value: undefined })
   },
 
+  propose: {
+    store: async () => ({ ok: true, value: 'famaridon/telmi-store-dev' }),
+    entry: async () => ({
+      ok: true,
+      value: {
+        url: 'https://github.com/famaridon/telmi-store-dev/pull/12',
+        number: 12,
+        branch: 'proposition/les-contes-de-la-mere-pauline',
+        fork: 'famaridon/telmi-store-dev',
+        updated: false
+      }
+    }),
+    open: async () => ({ ok: true, value: undefined })
+  },
+
   publish: {
     pack: async () => ({
       ok: true,

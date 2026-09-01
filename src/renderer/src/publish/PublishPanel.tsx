@@ -3,6 +3,7 @@ import type { BuiltPack } from '@domain/pack'
 import { entryToJson } from '@domain/rules/entry'
 import ErrorBanner from '../presentation/ErrorBanner'
 import { formatBytes } from '../presentation/format'
+import ProposePanel from '../propose/ProposePanel'
 import { usePublish } from './usePublish'
 
 interface Props {
@@ -99,6 +100,12 @@ function PublishPanel({ submission, pack, uuid, login }: Props): React.JSX.Eleme
             de ton histoire — proposer cette fiche est l’étape suivante.
           </p>
           <pre className="fiche">{JSON.stringify(entryToJson(state.published.entry), null, 2)}</pre>
+
+          <ProposePanel
+            entry={state.published.entry}
+            packUrl={state.published.url}
+            coverId={submission.cover?.id ?? ''}
+          />
 
           <div className="build-actions">
             <button type="button" className="link" onClick={publish.reset}>

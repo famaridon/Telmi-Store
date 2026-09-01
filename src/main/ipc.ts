@@ -6,6 +6,8 @@ import { admitPaths, fetchFromUrl, listLibrary, pickFiles } from '@app/usecases'
 import { restoreSession, signIn, signOut } from '@app/signIn'
 import { buildPack } from '@app/buildPack'
 import { publishPack } from '@app/publishPack'
+import { proposeEntry } from '@app/proposeEntry'
+import { DEFAULT_STORE_REPO } from '@infra/config'
 import type { Answer, Channel, Params } from '@shared/contract'
 import { CHANNELS } from '@shared/contract'
 
@@ -89,6 +91,25 @@ export const registerIpc = (ports: Ports): void => {
   handle('publish:pack', (request) =>
     publishPack(ports, request, (sent, total) => emit('publish:progress', { sent, total }))
   )
+
+  // The address of the last proposal is kept here, like the path of the last
+  // pack: opening it is all the interface needs, and it has no business naming
+  // an arbitrary URL.
+  let lastProposal: string | null = null
+
+  handle('propose:entry', async (request) => {
+    const proposed = await proposeEntry(ports, request)
+    if (proposed.ok) lastProposal = proposed.value.url
+    return proposed
+  })
+
+  handle('propose:store', async () => ok(DEFAULT_STORE_REPO))
+
+  handle('propose:open', async () => {
+    if (lastProposal === null) return fail({ code: 'propose/store-unreachable', repo: 'aucune proposition' })
+    await ports.shell.openUrl(lastProposal)
+    return ok(undefined)
+  })
 
   handle('pack:reveal', async () => {
     if (lastPack === null) return fail({ code: 'pack/unwritable', cause: 'aucun pack construit' })

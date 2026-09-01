@@ -44,6 +44,8 @@ export type AppError =
   | { code: 'github/upload-failed'; cause: string }
   | { code: 'github/not-public'; url: string; status: number }
   | { code: 'github/size-mismatch'; expected: number; found: number }
+  | { code: 'propose/fork-too-slow'; repo: string }
+  | { code: 'propose/store-unreachable'; repo: string }
   | { code: 'ui/no-window' }
   | { code: 'ipc/unknown-channel'; channel: string }
   | { code: 'internal/unexpected'; cause: string }

@@ -186,6 +186,19 @@ export const describeError = (error: AppError): ShownError => {
           'Relance la publication.',
         detail: `attendu ${error.expected} octets, trouvé ${error.found}`
       }
+    case 'propose/fork-too-slow':
+      return {
+        message:
+          "GitHub met plus longtemps que d'habitude à préparer ta copie du store. Attends une " +
+          'minute et relance : la proposition reprendra.',
+        detail: error.repo
+      }
+    case 'propose/store-unreachable':
+      return {
+        message:
+          "Ce store est introuvable. Il a peut-être été renommé, ou rendu privé.",
+        detail: error.repo
+      }
     case 'ui/no-window':
       return { message: 'Aucune fenêtre disponible.' }
     case 'ipc/unknown-channel':

@@ -294,6 +294,27 @@ appels REST, et **aucun octet du dépôt du store n'est téléchargé** :
 Le fork protège gratuitement le store : les fichiers d'un contributeur atterrissent sur
 son compte, jamais sur celui du store avant la fusion.
 
+### Trois pièges, tous testés ✅
+
+- **Le fork est asynchrone.** GitHub répond à la création puis termine plus tard : créer un
+  blob juste après échoue par intermittence. On attend qu'il réponde vraiment.
+- **Un fork vieillit.** Brancher depuis la pointe du fork construirait sur une base
+  d'il y a six mois. La branche est coupée depuis la pointe **du store**, que le fork peut
+  atteindre puisque les deux partagent leurs objets chez GitHub.
+- **Une proposition déjà ouverte** est mise à jour, pas dupliquée.
+
+La séquence tourne contre un faux GitHub local dans les tests : cet adaptateur ne peut pas
+être essayé contre l'API réelle sans créer des dépôts publics sur le compte de quelqu'un,
+et c'est là que l'ordre compte le plus.
+
+### Où vit la prose
+
+Le titre et le corps de la proposition sont **composés par l'interface** et passés dans la
+requête. Ce sont des phrases françaises lues par un humain, donc de la présentation : le
+domaine décide *ce qui* est proposé, pas *comment c'est formulé*. Le corps est
+délibérément un tableau court — quelqu'un qui relit vingt propositions veut voir les droits
+et la source d'un coup d'œil, pas lire.
+
 ## 7. Le contrat du store
 
 Une **fiche** est ce qui est versionné et relu. Elle porte trois choses que rien d'autre
@@ -368,6 +389,7 @@ src/
 │   ├── ports.ts               ✅ StoryLibrary, FileVault, FilePicker, Fetcher
 │   ├── pack.ts               ✅ la forme d'un pack : stages, actions, marqueurs
 │   ├── publish.ts            ✅ ce qu'une publication demande, et ce qu'elle produit
+│   ├── propose.ts            ✅ ce qu'une proposition porte, et ce qu'elle rend
 │   └── rules/
 │       ├── submission.ts      ✅ reviewSubmission : ce qui bloque, ce qui avertit
 │       ├── files.ts           ✅ extensions, types MIME, nom d'un téléchargement
@@ -411,6 +433,7 @@ src/
     ├── build/             ✅ dessin sur canvas et suivi de la fabrication
     ├── voice/             ✅ enregistrement au micro et encodage mp3 pur JS
     ├── publish/           ✅ envoi du pack et aperçu de la fiche
+    ├── propose/           ✅ la proposition, et la prose que le modérateur lit
     ├── submit/                   dépôt GitHub, release, pull request, suivi
     └── moderate/                 propositions ouvertes, écouter, accepter, refuser
 ```

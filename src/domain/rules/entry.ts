@@ -110,3 +110,19 @@ export const entryFileName = (entry: StoreEntry): string => `histoires/${entry.s
 
 /** And the thumbnail beside it, which the checker also demands. */
 export const thumbnailFileName = (entry: StoreEntry): string => `vignettes/${entry.slug}.png`
+
+/** Size of the thumbnail shown in a store listing. */
+export const THUMBNAIL_SIZE = { width: 512, height: 512 } as const
+
+/**
+ * The branch a proposal lives on, in the contributor's fork.
+ *
+ * One branch per story, named after it: several proposals can then be in flight
+ * at once, and correcting one pushes to the same branch rather than opening a
+ * second pull request.
+ */
+export const proposalBranch = (slug: string): string => `proposition/${slug}`
+
+/** Developer-facing metadata, so English like the rest of the code. */
+export const proposalCommitMessage = (entry: StoreEntry): string =>
+  `add ${entry.slug} ${entry.version}`

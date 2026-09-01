@@ -272,25 +272,31 @@ La barre de progression existe parce que `fetch` n'en donne aucune : l'envoi pas
 
 ---
 
-## Lot 6 — Proposer : la pull request
+## Lot 6 — Proposer : la pull request ✅
 
-**Taille : M.** Dépend de : lot 5.
+**Livré.** Dépend de : lot 5.
 
-- [ ] `POST /repos/{store}/forks`, en attendant que le fork réponde réellement
-- [ ] Réutiliser et resynchroniser un fork existant
-- [ ] `POST /git/blobs` pour la fiche et la vignette
-- [ ] `POST /git/trees` → `/git/commits` → `PATCH /git/refs/heads/<branche>`
-- [ ] `POST /repos/{store}/pulls`, avec un corps qui reprend la fiche en clair
+- [x] `POST /repos/{store}/forks`, en attendant que le fork réponde réellement
+- [x] Réutiliser et resynchroniser un fork existant
+- [x] `POST /git/blobs` pour la fiche et la vignette
+- [x] `POST /git/trees` → `/git/commits` → `PATCH /git/refs/heads/<branche>`
+- [x] `POST /repos/{store}/pulls`, avec un corps qui reprend la fiche en clair
 
-**Critère d'acceptation.** Une pull request apparaît sur `telmi-store-dev` avec exactement
-deux fichiers ajoutés, et l'Action de validation passe au vert dessus.
+**Points d'attention tenus, et testés.** La séquence de six appels tourne contre un faux
+GitHub local — dix cas, dont les trois qui font vraiment mal :
 
-**Points d'attention.** Le fork est **asynchrone** chez GitHub : créer un blob juste après
-échoue parfois. Une branche par proposition, nommée d'après le `slug`.
+- le **fork est asynchrone** : GitHub répond à la création puis termine plus tard, donc on
+  attend qu'il réponde vraiment au lieu d'enchaîner sur un blob qui échouerait ;
+- un **fork vieillit** : la branche est coupée depuis la pointe **du store**, pas du fork,
+  sinon on construit sur une base d'il y a six mois et on fabrique des conflits ;
+- une **proposition déjà ouverte** est mise à jour, pas dupliquée — la branche est
+  déplacée et la même pull request est rendue.
 
-**C'est ici le premier jalon démontrable.** À la fin de ce lot, une proposition part
-réellement : c'est le moment d'en parler à DantSu, avec une vraie PR sur un vrai store
-plutôt qu'un plan.
+⏳ **Critère d'acceptation restant** : voir la proposition apparaître pour de vrai sur
+`telmi-store-dev` avec ses deux fichiers, et l'Action de validation passer au vert dessus.
+
+**C'est le premier jalon démontrable, et il est à portée d'un clic.** Le code y est ;
+il manque l'essai réel, qui crée un dépôt et une pull request visibles.
 
 ---
 

@@ -15,3 +15,12 @@
  */
 export const GITHUB_CLIENT_ID =
   process.env['TELMI_STORE_GITHUB_CLIENT_ID'] ?? 'Ov23likVrp9mwsOFlqtu'
+
+/**
+ * The store a proposal goes to.
+ *
+ * A single one for now. The directory of stores is a later stage; until then the
+ * interface shows this name so nobody proposes into the wrong repository by
+ * accident.
+ */
+export const DEFAULT_STORE_REPO = process.env['TELMI_STORE_REPO'] ?? 'famaridon/telmi-store-dev'

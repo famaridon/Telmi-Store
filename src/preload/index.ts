@@ -4,6 +4,7 @@ import type { FileKind } from '@domain/model'
 import type { PackPlan } from '@domain/pack'
 import type { PackFile } from '@domain/ports'
 import type { PublishRequest } from '@domain/publish'
+import type { ProposeRequest } from '@domain/propose'
 import type { Answer, Channel, EventChannel, Events, Params } from '@shared/contract'
 import { CHANNELS, EVENT_CHANNELS, FILE_SCHEME } from '@shared/contract'
 
@@ -50,6 +51,14 @@ const api = {
   publish: {
     /** Resolves once the pack is fetchable by anyone. */
     pack: (request: PublishRequest) => invoke('publish:pack', request)
+  },
+
+  propose: {
+    entry: (request: ProposeRequest) => invoke('propose:entry', request),
+    /** Which store a proposal goes to. */
+    store: () => invoke('propose:store'),
+    /** Opens the last proposal in the browser. Takes no URL, on purpose. */
+    open: () => invoke('propose:open')
   },
 
   packs: {
