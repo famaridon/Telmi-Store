@@ -33,6 +33,11 @@ Studio de Telmi-Sync.
 Coquille Electron + React + TypeScript, trois cibles typées. Renderer isolé, CSP. Contrat
 d'IPC unique où tout canal renvoie un `Result<T>`.
 
+**Architecture en couches**, dépendances vers l'intérieur, avec quatre ports et une racine
+de composition. La règle est vérifiée par `tests/architecture.test.ts`, qui échoue sur une
+dépendance interdite, une fabrique appelée hors racine, ou une phrase française hors de
+`renderer/`. Voir [docs/archi.md](docs/archi.md), section 2.
+
 Lecture en seule lecture de `~/.telmi/stories`. **Ce n'est plus le chemin principal** : ça
 devient une voie secondaire, « proposer une histoire déjà fabriquée », utile à qui a déjà
 des packs — et l'écran qui rend visible le bug des `version: 0`.
@@ -60,8 +65,12 @@ Un seul écran, qui doit être franchissable par un parent ou une institutrice.
 - [x] Aperçu avant fabrication : la liste des chapitres avec leurs durées et le poids total
 
 **Critère d'acceptation.** Depuis un dossier de mp3 quelconque, on remplit l'écran et on
-arrive au bout sans jamais ouvrir un terminal ni un éditeur de texte. **Reste à confirmer
-par un essai humain** : le glisser-déposer et l'aperçu ne se testent pas sans souris.
+arrive au bout sans jamais ouvrir un terminal ni un éditeur de texte.
+
+⏳ **Reste un essai humain**, seul point ouvert de ce lot : le glisser-déposer, les aperçus
+et le confort général ne se testent pas sans souris. `npm run dev`, puis glisser plusieurs
+mp3, écouter une piste et se déplacer dedans, coller une URL, et regarder ce que dit le
+récapitulatif quand il manque des choses.
 
 En prime, le contributeur peut **écouter chaque piste dans l'écran** avant de proposer —
 ce qui est la moitié du travail de curation.
@@ -299,14 +308,18 @@ Un store invisible ne reçoit pas de contribution.
 
 ---
 
-## Lot T — Tests
+## Lot T — Tests 🟡
 
-**Taille : S** pour la mise en place, puis continu. **À mener pendant le lot 2.**
+**Mise en place faite, 56 tests.** À poursuivre au fil des lots.
 
-- [ ] Vitest, un script `npm test`
-- [ ] Couvrir la logique pure : génération de `nodes.json` pour 1, 2 et N chapitres,
-      bouclage du dernier chapitre, présence des quatre marqueurs, empreinte, slug,
-      validation de fiche
+- [x] Vitest, un script `npm test`
+- [x] Règles du domaine : `reviewSubmission` (ce qui bloque, ce qui avertit, les totaux),
+      `titleFromFilename`, extensions et types MIME, nom d'un téléchargement
+- [x] Adaptateur réseau contre un coffre en mémoire : succès, progression, et chaque mode
+      d'échec nommé
+- [x] Barrière d'architecture : imports interdits, racine de composition, langue
+- [ ] À venir avec le lot 2 : génération de `nodes.json` pour 1, 2 et N chapitres,
+      bouclage du dernier chapitre, présence des quatre marqueurs, empreinte, slug
 - [ ] Ne pas bouchonner les appels GitHub : les valider contre `telmi-store-dev`
 
 La génération de `nodes.json` est la fonction la plus testable du projet et celle dont
