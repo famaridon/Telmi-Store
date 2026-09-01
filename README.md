@@ -102,12 +102,25 @@ total size of a release, nor bandwidth usage ».
 
 ## État d'avancement
 
-Amorçage. La coquille Electron + React + TypeScript est en place, avec une première
-tranche réelle : la lecture de la bibliothèque locale de Telmi-Sync, qui est l'entrée de
-tout le reste.
+**La boucle est complète, en code.** Cinq écrans :
 
-Ce qui reste à écrire est découpé dans [projet.md](projet.md), et l'architecture cible
-est décrite dans [docs/archi.md](docs/archi.md).
+| Onglet | Ce qu'il fait |
+| --- | --- |
+| **Déposer une histoire** | mp3 par fichier ou par URL, titres, couverture, droits, voix au micro, fabrication du pack, publication, proposition |
+| **Mes propositions** | l'état de chacune et ce qu'un modérateur a dit, sans ouvrir GitHub |
+| **Modération** | écouter sans rien installer, accepter, refuser avec un motif pré-écrit |
+| **Découvrir** | les stores connus, lus dans un annuaire distant |
+| **Ma bibliothèque** | les histoires déjà installées par Telmi-Sync, en seule lecture |
+
+240 tests, dont une barrière qui vérifie l'architecture et la langue.
+
+⏳ **Ce qui manque n'est plus du code mais des essais réels** : la boucle
+publier/proposer/modérer n'a pas encore rencontré GitHub, et aucun pack fabriqué ici n'a
+été écouté sur une vraie conteuse. Le détail est en tête de [projet.md](projet.md).
+
+L'architecture est décrite dans [docs/archi.md](docs/archi.md), le format produit dans
+[docs/format-pack.md](docs/format-pack.md), et deux contributions prêtes pour Telmi-Sync
+dans [docs/contributions-telmi-sync.md](docs/contributions-telmi-sync.md).
 
 ## Démarrer
 
