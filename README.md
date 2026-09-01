@@ -121,14 +121,10 @@ npm run apercu       # capture les écrans dans outils/apercu/, sans souris
 npm run dist:mac     # produit un .dmg
 ```
 
-Pour que la connexion GitHub fonctionne, il faut une OAuth App avec le Device Flow activé :
-
-```sh
-TELMI_STORE_GITHUB_CLIENT_ID=Ov23li… npm run dev
-```
-
-Sans elle, l'application explique quoi créer au lieu de casser. Voir
-[projet.md](projet.md), lot 4.
+La connexion GitHub fonctionne sans configuration : l'identifiant de l'OAuth App est
+commité, parce qu'un `client_id` est public par conception et qu'aucun secret client
+n'intervient dans le Device Flow. Pour viser une autre application — un fork, un test —
+`TELMI_STORE_GITHUB_CLIENT_ID=… npm run dev`.
 
 Node 22.13 ou plus récent.
 

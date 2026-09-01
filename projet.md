@@ -200,23 +200,23 @@ jamais l'IPC : l'interface apprend *qui* est connecté, jamais *avec quoi*. L'av
 a été retiré du modèle, parce que l'afficher aurait obligé à ouvrir la CSP sur
 `avatars.githubusercontent.com` — le renderer ne charge rien depuis le réseau.
 
-⏳ **Reste le prérequis humain** : créer l'OAuth App et cocher « Enable Device Flow ».
-Sans elle, la connexion échoue avec `auth/not-configured`, et l'interface explique quoi
-faire — plutôt que de casser obscurément.
+✅ **OAuth App créée et vérifiée.** `Ov23likVrp9mwsOFlqtu`, Device Flow actif, commitée
+dans `src/infrastructure/config.ts` — un `client_id` identifie une application, il ne
+l'authentifie pas, et aucun secret client n'intervient dans ce flux.
+
+Les deux premiers échanges ont été validés contre l'API réelle : la demande de code répond
+`interval: 5` et `expires_in: 899`, exactement ce que suppose `planNextPoll`, et le
+sondage répond `authorization_pending` sous la forme que parse l'adaptateur.
+
+⏳ **Reste un essai humain** : cliquer, saisir le code sur GitHub, autoriser — seule
+l'approbation dans un navigateur ne peut pas être automatisée.
+
+Pour pointer une compilation vers une autre OAuth App — un fork, ou une application de
+test — la variable d'environnement reste disponible :
 
 ```sh
-# 1. github.com/settings/applications/new
-#    Application name : Telmi Store
-#    Homepage URL     : https://github.com/famaridon/Telmi-Store
-#    Callback URL     : https://github.com/famaridon/Telmi-Store   (inutilisée, mais exigée)
-# 2. Dans les réglages de l'app : cocher « Enable Device Flow »
-# 3. Relever le Client ID, puis :
-TELMI_STORE_GITHUB_CLIENT_ID=Ov23li... npm run dev
+TELMI_STORE_GITHUB_CLIENT_ID=Ov23li… npm run dev
 ```
-
-Le `client_id` est **public par nature** — c'est tout l'intérêt de ce flux pour une
-application de bureau dont le code est lisible. Il pourra être commité dans
-`src/infrastructure/config.ts` une fois créé.
 
 ---
 

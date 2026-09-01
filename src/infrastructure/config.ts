@@ -1,14 +1,17 @@
 /**
- * The identifier of our GitHub OAuth App.
+ * The identifier of our GitHub OAuth App — "Telmi Store", owned by @famaridon.
  *
- * It is public: the Device Flow exists so a desktop application, whose code
- * anyone can read, can sign a user in without keeping a secret. Committing it is
- * therefore correct, not a leak.
+ * Committed on purpose. A client id identifies an application, it does not
+ * authenticate it: RFC 8252 classifies native applications as public clients,
+ * unable to keep a secret, which is precisely why the Device Flow exists. No
+ * client secret is involved anywhere in this project.
  *
- * As long as it is empty, signing in reports `auth/not-configured` and the
- * interface explains what to create on GitHub — rather than failing obscurely.
+ * What keeps someone from reusing it to impersonate us is GitHub's own
+ * authorization page, which names the application and its owner.
  *
- * To create it: github.com/settings/applications/new, then tick
- * "Enable Device Flow" in the application's settings.
+ * The environment variable stays useful for pointing a build at another OAuth
+ * App — a fork, or a test one. Left empty, signing in reports
+ * `auth/not-configured` and the interface explains what to create.
  */
-export const GITHUB_CLIENT_ID = process.env['TELMI_STORE_GITHUB_CLIENT_ID'] ?? ''
+export const GITHUB_CLIENT_ID =
+  process.env['TELMI_STORE_GITHUB_CLIENT_ID'] ?? 'Ov23likVrp9mwsOFlqtu'
