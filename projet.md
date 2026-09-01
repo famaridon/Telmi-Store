@@ -385,19 +385,40 @@ Un store invisible ne reçoit pas de contribution.
 
 ---
 
-## Lot 10 — Durcissement et suites
+## Lot 10 — Durcissement et suites 🟡
 
-**Taille : variable.** À n'engager qu'une fois la boucle en service.
+**Taille : variable.** Le lot dit lui-même « à n'engager qu'une fois la boucle en
+service ». Il l'est donc partiellement, et volontairement : chaque ligne ci-dessous porte
+sa raison.
 
-- [ ] Reprise sur erreur pour les envois d'assets volumineux
-- [ ] **Piper** pour la synthèse des titres, quand le micro ne suffit plus
-- [ ] Import d'un flux RSS complet (la deuxième itération du lot 1)
-- [ ] Enchaîner collecte et dépôt : importer un lot d'audios déjà récupérés par ailleurs
-      et en faire plusieurs propositions d'affilée
-- [ ] **Proposer à Telmi-Sync** la vérification de l'empreinte au téléchargement — le seul
-      point du plan qui demande une modification chez DantSu
-- [ ] **Proposer à Telmi-Sync** l'encodage `pal8` des images d'étape : un drapeau ffmpeg,
-      5,1 × sur 76 % du poids d'un pack interactif
+### Fait
+
+- [x] **Les deux contributions à Telmi-Sync sont prêtes**, chiffrées et rédigées dans
+      [docs/contributions-telmi-sync.md](docs/contributions-telmi-sync.md) : l'encodage
+      `pal8` des images d'étape (5,1 × sur 76 % du poids d'un pack) et la vérification de
+      l'empreinte au téléchargement. **Ce n'est pas notre dépôt** : la décision et la pull
+      request appartiennent à DantSu, on lui apporte la mesure et le diff.
+
+### Sans objet
+
+- [x] ~~Reprise sur erreur pour les envois d'assets volumineux~~ — **il n'y a rien à
+      construire.** L'API d'envoi d'asset de GitHub ne connaît pas la reprise par plage
+      d'octets : un envoi interrompu se relance, il ne se reprend pas. Or c'est
+      exactement ce que l'idempotence du lot 5 fournit déjà — le second essai retrouve ses
+      propres restes et les remplace, et le message d'erreur le dit. Le besoin est couvert,
+      la ligne était mal formulée.
+
+### À faire plus tard, et pourquoi
+
+- [ ] **Piper pour la synthèse des titres.** Le micro couvre le cas normal, et Piper ne
+      devient utile que le jour où quelqu'un publie trente chapitres d'un coup. Coût réel :
+      télécharger un binaire et une voix, soit 50 à 80 Mo. À engager quand le besoin se
+      manifeste, pas avant.
+- [ ] **Import d'un flux RSS complet.** C'est le geste le plus naturel pour un podcast, et
+      c'est ce qui a produit les stores existants. Mais c'est un lot à lui seul, et il ne
+      sert à rien avant que la boucle ait des utilisateurs.
+- [ ] **Enchaîner collecte et dépôt.** Même raison : utile le jour où quelqu'un propose
+      dix histoires d'affilée.
 
 ---
 
@@ -438,6 +459,22 @@ flowchart TD
   L8 --> L10["Lot 10 · Suites"]
   L2 -.-> LT["Lot T · Tests"]
 ```
+
+## Ce qui reste, une fois les dix lots passés
+
+Tout le code est là. Ce qui manque n'est plus du code mais des **essais réels**, groupés
+en une seule session avec un second compte GitHub :
+
+1. **Publier, proposer, refuser** — lots 5 à 8 d'un coup : déposer deux mp3, fabriquer,
+   publier, proposer depuis un compte ; écouter et refuser depuis l'autre. Aucune de ces
+   quatre étapes n'a encore rencontré GitHub pour de vrai.
+2. **Écouter un pack sur une conteuse** — lots 2 et 3. Le format est vérifié contre le
+   validateur et contre ffmpeg, mais seul le matériel dira si le bouton HOME tombe où
+   l'enfant l'attend, et si les titres s'annoncent au bon moment.
+3. **Franchir l'écran de dépôt à la souris** — lot 1. Le glisser-déposer et le confort
+   général ne se testent pas sans main.
+
+Puis, seulement ensuite : les trois suites du lot 10, et les deux propositions à DantSu.
 
 ## Ordre conseillé
 
